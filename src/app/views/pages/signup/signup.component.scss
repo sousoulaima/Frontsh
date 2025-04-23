@@ -1,0 +1,25 @@
+:root {
+    --dark-form: rgba(255, 255, 255, 0.8);
+    --dark-input: #f3f4f6; 
+    --text-gray: #6b7280; 
+  }
+  
+  :host {
+    display: block;
+    min-height: 100vh;
+  }
+  
+  .form-group {
+    position: relative;
+  
+    .form-control {
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      background: transparent;
+      outline: none;
+  
+      &:focus {
+        border-bottom-color: #2dd4bf; 
+      }
+    }
+  }

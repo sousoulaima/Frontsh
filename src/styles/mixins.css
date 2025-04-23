@@ -1,0 +1,61 @@
+/* Mixins pour les media queries */
+@define-mixin media-sm {
+  @media (min-width: 576px) {
+    @mixin-content;
+  }
+}
+
+@define-mixin media-md {
+  @media (min-width: 768px) {
+    @mixin-content;
+  }
+}
+
+@define-mixin media-lg {
+  @media (min-width: 992px) {
+    @mixin-content;
+  }
+}
+
+@define-mixin media-xl {
+  @media (min-width: 1200px) {
+    @mixin-content;
+  }
+}
+
+@define-mixin media-xxl {
+  @media (min-width: 1400px) {
+    @mixin-content;
+  }
+}
+
+/* Mixins pour les transitions */
+@define-mixin transition $property: all, $duration: 0.2s, $timing: ease-in-out {
+  transition: $property $duration $timing;
+}
+
+/* Mixins pour les flexbox */
+@define-mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@define-mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Mixins pour les ombres */
+@define-mixin shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+@define-mixin shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+@define-mixin shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+} 

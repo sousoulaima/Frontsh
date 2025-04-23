@@ -1,0 +1,175 @@
+<main class="container mx-auto p-8 bg-gradient-to-br from-blue-100 to-teal-100 min-h-screen">
+  <!-- Header -->
+  <header class="flex justify-between items-center mb-12 animate-slide-down">
+    <div class="flex items-center space-x-4">
+      <div class="w-14 h-14 bg-indigo-800 rounded-full flex items-center justify-center text-white text-3xl font-bold animate-heartbeat">SH</div>
+      <div>
+        <h1 class="text-3xl font-bold text-indigo-900">Revenus</h1>
+        <p class="text-5xl font-semibold text-teal-800 animate-pulse">{{ totalRevenue | number:'1.0-0' }} DT</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="relative">
+        <input type="text" placeholder="Rechercher..." class="pl-10 pr-4 py-2 rounded-full bg-white shadow-md focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all duration-300">
+        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-semibold animate-heartbeat" [ngClass]="user.avatarColor">{{ user.initials }}</div>
+        <div>
+          <p class="text-sm font-semibold text-indigo-900">{{ user.name }}</p>
+          <p class="text-xs text-gray-600">{{ user.role }}</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Key Metrics and Client List -->
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+    <!-- Key Metrics -->
+    <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Coworking -->
+      <div class="bg-gradient-to-r from-indigo-50 to-teal-50 p-6 rounded-2xl shadow-xl transform transition duration-500 animate-zoom-in">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center">
+            <svg class="w-7 h-7 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-indigo-900">Coworking</h2>
+            <p class="text-sm text-gray-700">Occupé {{ coworkingOccupancy }}/{{ coworkingTotal }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+              <div class="bg-indigo-600 h-3 rounded-full animate-fill" [style.width]="(coworkingOccupancy / coworkingTotal) * 100 + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Espace partagé -->
+      <div class="bg-gradient-to-r from-teal-50 to-emerald-50 p-6 rounded-2xl shadow-xl transform transition duration-500 animate-zoom-in animation-delay-200">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center">
+            <svg class="w-7 h-7 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h-4"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-indigo-900">Espace partagé</h2>
+            <p class="text-sm text-gray-700">Occupé {{ sharedSpaceOccupancy }}/{{ sharedSpaceTotal }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+              <div class="bg-teal-600 h-3 rounded-full animate-fill" [style.width]="(sharedSpaceOccupancy / sharedSpaceTotal) * 100 + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bureau virtuel -->
+      <div class="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl shadow-xl transform transition duration-500 animate-zoom-in animation-delay-400">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 bg-yellow-100 rounded-full flex decreed items-center justify-center">
+            <svg class="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-indigo-900">Bureau virtuel</h2>
+            <p class="text-sm text-gray-700">Occupé {{ virtualOfficeOccupancy }}/{{ virtualOfficeTotal }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+              <div class="bg-yellow-500 h-3 rounded-full animate-fill" [style.width]="(virtualOfficeOccupancy / virtualOfficeTotal) * 100 + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bureau privé -->
+      <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-2xl shadow-xl transform transition duration-500 animate-zoom-in animation-delay-600">
+        <div class="flex items-center space-x-4">
+          <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-indigo-900">Bureau privé</h2>
+            <p class="text-sm text-gray-700">Occupé {{ privateOfficeOccupancy }}/{{ privateOfficeTotal }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-2 overflow-hidden">
+              <div class="bg-purple-600 h-3 rounded-full animate-fill" [style.width]="(privateOfficeOccupancy / privateOfficeTotal) * 100 + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client List -->
+    <div class="bg-white p-6 rounded-2xl shadow-xl">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-semibold text-indigo-900 animate-fade-in">Liste des clients</h2>
+        <a href="#" class="text-teal-700 text-sm font-semibold hover:underline transition-colors duration-300">Voir tout</a>
+      </div>
+      <div class="space-y-6">
+        <div *ngFor="let client of clients; let i = index" class="flex items-center justify-between animate-fade-in-up" [ngClass]="'animation-delay-' + (i * 150)">
+          <div class="flex items-center space-x-4">
+            <div *ngIf="client.hasCustomIcon; else defaultAvatar" class="w-12 h-12 rounded-full flex items-center justify-center bg-teal-500 animate-rotate-icon">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+              </svg>
+            </div>
+            <ng-template #defaultAvatar>
+              <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-semibold animate-heartbeat" [ngClass]="client.avatarColor">{{ client.initials }}</div>
+            </ng-template>
+            <div>
+              <p class="text-sm font-semibold text-indigo-900">{{ client.name }}</p>
+              <p class="text-xs text-gray-600">{{ client.email }}</p>
+            </div>
+          </div>
+          <svg class="w-5 h-5 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visitors Statistic -->
+  <section class="bg-gradient-to-r from-white to-gray-50 p-6 rounded-2xl shadow-xl mb-12 animate-fade-in">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-lg font-semibold text-indigo-900">Statistiques des visiteurs</h2>
+      <div class="flex space-x-3">
+        <button (click)="setVisitorPeriod('1J')" [ngClass]="{'bg-indigo-600 text-white': selectedPeriod === '1J', 'bg-indigo-100 text-indigo-700': selectedPeriod !== '1J'}" class="px-4 py-1 rounded-full text-sm hover:bg-indigo-200 transition-colors duration-300 animate-pulse-button">1J</button>
+        <button (click)="setVisitorPeriod('1S')" [ngClass]="{'bg-indigo-600 text-white': selectedPeriod === '1S', 'bg-indigo-100 text-indigo-700': selectedPeriod !== '1S'}" class="px-4 py-1 rounded-full text-sm hover:bg-indigo-200 transition-colors duration-300 animate-pulse-button">1S</button>
+        <button (click)="setVisitorPeriod('1M')" [ngClass]="{'bg-indigo-600 text-white': selectedPeriod === '1M', 'bg-indigo-100 text-indigo-700': selectedPeriod !== '1M'}" class="px-4 py-1 rounded-full text-sm hover:bg-indigo-200 transition-colors duration-300 animate-pulse-button">1M</button>
+        <button (click)="setVisitorPeriod('1A')" [ngClass]="{'bg-indigo-600 text-white': selectedPeriod === '1A', 'bg-indigo-100 text-indigo-700': selectedPeriod !== '1A'}" class="px-4 py-1 rounded-full text-sm hover:bg-indigo-200 transition-colors duration-300 animate-pulse-button">1A</button>
+      </div>
+    </div>
+    <div class="relative h-80">
+      <canvas id="visitorChart" #visitorChart></canvas>
+    </div>
+  </section>
+
+  <!-- Activity -->
+  <section class="bg-white p-6 rounded-2xl shadow-xl">
+    <h2 class="text-lg font-semibold text-indigo-900 mb-6 animate-fade-in">Activités</h2>
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b">
+          <th class="py-3 px-4 text-gray-700">Nom</th>
+          <th class="py-3 px-4 text-gray-700">Type</th>
+          <th class="py-3 px-4 text-gray-700">Statut</th>
+          <th class="py-3 px-4 text-gray-700">Revenus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let space of spaces; let i = index" class="border-b transform transition-all duration-500 hover:bg-indigo-50 hover:shadow-md animate-slide-in-right" [ngClass]="'animation-delay-' + (i * 200)">
+          <td class="py-3 px-4 text-indigo-900">{{ space.name }}</td>
+          <td class="py-3 px-4 text-gray-700">{{ space.type }}</td>
+          <td class="py-3 px-4">
+            <span class="px-4 py-1 rounded-full text-sm font-medium animate-pulse-status" [ngClass]="space.status === 'Occupé' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'">{{ space.status }}</span>
+          </td>
+          <td class="py-3 px-4 text-teal-800 font-semibold">{{ space.revenue | number:'1.0-0' }} DT</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main>

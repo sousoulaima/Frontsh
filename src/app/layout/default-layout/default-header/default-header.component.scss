@@ -1,0 +1,17 @@
+.app-content {
+  padding-top: 56px; /* Adjust based on the header height */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Ensure the header has a fixed height */
+:host(app-default-header) .c-container {
+  height: 56px; /* Define the header height */
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}

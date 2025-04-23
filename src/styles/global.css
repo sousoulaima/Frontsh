@@ -1,0 +1,155 @@
+/* Reset et styles de base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  font-family: var(--cui-font-family-sans-serif);
+  font-size: var(--cui-font-size-base);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--cui-body-color);
+  background-color: var(--cui-body-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typographie */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+/* Liens */
+a {
+  color: var(--cui-primary);
+  text-decoration: none;
+  background-color: transparent;
+}
+
+a:hover {
+  color: #1f1498;
+  text-decoration: underline;
+}
+
+/* Images */
+img {
+  vertical-align: middle;
+  border-style: none;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Formulaires */
+button,
+input,
+optgroup,
+select,
+textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button,
+input {
+  overflow: visible;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+/* Utilitaires */
+.text-center {
+  text-align: center !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.mt-0 {
+  margin-top: 0 !important;
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.ml-0 {
+  margin-left: 0 !important;
+}
+
+.mr-0 {
+  margin-right: 0 !important;
+}
+
+.p-0 {
+  padding: 0 !important;
+}
+
+/* Classes pour les couleurs */
+.text-primary {
+  color: var(--cui-primary) !important;
+}
+
+.text-success {
+  color: var(--cui-success) !important;
+}
+
+.text-danger {
+  color: var(--cui-danger) !important;
+}
+
+.text-warning {
+  color: var(--cui-warning) !important;
+}
+
+.text-info {
+  color: var(--cui-info) !important;
+}
+
+/* Classes pour les backgrounds */
+.bg-primary {
+  background-color: var(--cui-primary) !important;
+}
+
+.bg-success {
+  background-color: var(--cui-success) !important;
+}
+
+.bg-danger {
+  background-color: var(--cui-danger) !important;
+}
+
+.bg-warning {
+  background-color: var(--cui-warning) !important;
+}
+
+.bg-info {
+  background-color: var(--cui-info) !important;
+} 

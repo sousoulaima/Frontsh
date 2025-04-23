@@ -1,0 +1,124 @@
+<div class="gestion-modalites-container">
+  <div class="gestion-modalites">
+    <!-- Modal for Adding/Editing a Modalité -->
+    <div class="modal" *ngIf="showModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditing ? 'Modifier la modalité' : 'Ajouter une modalité' }}</h2>
+        <form (ngSubmit)="saveModalite()" #modaliteForm="ngForm">
+          <!-- Code Modalité (affiché seulement si on édite) -->
+          <div class="form-group" *ngIf="isEditing">
+            <label>Code Modalité</label>
+            <input
+              type="text"
+              [(ngModel)]="currentModalite.codeMod"
+              name="codeMod"
+              readonly
+              class="form-input"
+            />
+          </div>
+
+          <!-- Désignation Modalité -->
+          <div class="form-group">
+            <label>Désignation Modalité</label>
+            <input
+              type="text"
+              [(ngModel)]="currentModalite.designationmod"
+              name="designationmod"
+              required
+              #designationmod="ngModel"
+              class="form-input"
+              placeholder="Entrez la désignation"
+            />
+            <span class="error" *ngIf="designationmod.invalid && designationmod.touched">La désignation est requise</span>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="save-btn" [disabled]="!modaliteForm.valid">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-title">
+        <h1 class="text-blue-800 animate-fade-in">Modalités de Règlement</h1>
+        <p class="text-gray-600 animate-fade-in">
+          Liste des modalités de règlement ({{ filteredModalites.length }} modalités)
+        </p>
+      </div>
+      <button class="add-btn bg-blue-600 hover:bg-blue-700 text-white" (click)="openAddModal()">+ Ajouter une modalité</button>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-filter">
+      <div class="search">
+        <input
+          type="text"
+          placeholder="Rechercher une modalité..."
+          [(ngModel)]="searchQuery"
+          (input)="filterModalites()"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+
+    <!-- Modalités Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>CODE MODALITÉ</th>
+            <th>DÉSIGNATION MODALITÉ</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let modalite of filteredModalites; let i = index"
+            class="animate-slide-in-right"
+            [ngClass]="'animation-delay-' + (i * 100)"
+          >
+            <td>{{ modalite.codeMod }}</td>
+            <td>{{ modalite.designationmod }}</td>
+            <td class="actions">
+              <button class="action-btn view" (click)="viewModalite(modalite)" title="Voir">👁️</button>
+              <button class="action-btn edit" (click)="openEditModal(modalite)" title="Éditer">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteModalite(modalite)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal for Viewing a Modalité -->
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Détails de la modalité</h2>
+        <div class="user-details">
+          <p><strong>Code Modalité :</strong> {{ viewedModalite?.codeMod }}</p>
+          <p><strong>Désignation Modalité :</strong> {{ viewedModalite?.designationmod }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmer la suppression</h2>
+        <p class="modal-text">
+          Êtes-vous sûr de vouloir supprimer la modalité {{ modaliteToDelete?.designationmod }} ?
+        </p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
+          <button class="delete-btn" (click)="deleteModalite()">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

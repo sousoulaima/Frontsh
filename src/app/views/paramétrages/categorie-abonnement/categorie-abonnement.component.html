@@ -1,0 +1,110 @@
+<div class="gestion-categories-container">
+  <div class="gestion-categories">
+    <!-- Modal for Adding/Editing a Category -->
+    <div class="modal" *ngIf="showModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditMode ? 'Modifier la catégorie' : 'Ajouter une catégorie' }}</h2>
+        <form (ngSubmit)="saveCategorie()" #categorieForm="ngForm">
+          <div class="form-group" *ngIf="isEditMode">
+            <label>Code</label>
+            <input
+              type="text"
+              [(ngModel)]="currentCategorie.codecateg"
+              name="codecateg"
+              readonly
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Désignation*</label>
+            <input
+              type="text"
+              [(ngModel)]="currentCategorie.designationcateg"
+              name="designationcateg"
+              required
+              class="form-input"
+              placeholder="Entrez la désignation"
+            />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="save-btn" [disabled]="!categorieForm.valid">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-title">
+        <h1>Catégories d'Abonnement</h1>
+        <p>Liste des catégories d'abonnement ({{ filteredCategories.length }} catégories)</p>
+      </div>
+      <button class="add-btn" (click)="openAddModal()">+ Ajouter une catégorie</button>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-filter">
+      <div class="search">
+        <input
+          type="text"
+          placeholder="Rechercher une catégorie..."
+          [(ngModel)]="searchTerm"
+          (input)="filterCategories()"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>CODE</th>
+            <th>DÉSIGNATION</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let categorie of filteredCategories">
+            <td>{{ categorie.codecateg }}</td>
+            <td>{{ categorie.designationcateg }}</td>
+            <td class="actions">
+              <button class="action-btn view" (click)="viewCategorie(categorie)" title="Voir">👁️</button>
+              <button class="action-btn edit" (click)="openEditModal(categorie)" title="Éditer">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteCategorie(categorie)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal for Viewing a Category -->
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Détails de la catégorie</h2>
+        <div class="user-details">
+          <p><strong>Code :</strong> {{ viewedCategorie?.codecateg }}</p>
+          <p><strong>Désignation :</strong> {{ viewedCategorie?.designationcateg }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmer la suppression</h2>
+        <p class="modal-text">Êtes-vous sûr de vouloir supprimer la catégorie "{{ categorieToDelete?.designationcateg }}" ?</p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
+          <button class="delete-btn" (click)="deleteCategorie()">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

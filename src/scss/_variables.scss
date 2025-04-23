@@ -1,0 +1,45 @@
+// Variables de couleur personnalisées
+$primary: #2eb85c;  // Couleur principale
+$secondary: #9da5b1;
+$success: #2eb85c;
+$info: #39f;
+$warning: #f9b115;
+$danger: #e55353;
+$light: #ebedef;
+$dark: #4f5d73;
+
+// Variables pour le dashboard
+$body-bg: #f8f9fa;
+$body-color: #3c4b64;
+$border-color: #d8dbe0;
+
+// Couleurs de l'interface abonnement
+$subscription-primary: #2eb85c;
+$subscription-secondary: #3c4b64;
+$subscription-accent: #39f;
+
+:root {
+  --cui-primary: #{$primary};
+  --cui-secondary: #{$secondary};
+  --cui-success: #{$success};
+  --cui-info: #{$info};
+  --cui-warning: #{$warning};
+  --cui-danger: #{$danger};
+  --cui-light: #{$light};
+  --cui-dark: #{$dark};
+
+  --cui-body-bg: #{$body-bg};
+  --cui-body-color: #{$body-color};
+  --cui-border-color: #{$border-color};
+
+  // Variables spécifiques au dashboard
+  --cui-sidebar-bg: #{$subscription-secondary};
+  --cui-sidebar-color: #{$light};
+  --cui-header-bg: #{$subscription-primary};
+  --cui-header-color: #{$light};
+  
+  // Couleurs des cartes et widgets
+  --cui-card-bg: #ffffff;
+  --cui-card-border-color: #{$border-color};
+  --cui-card-cap-bg: #{$body-bg};
+} 

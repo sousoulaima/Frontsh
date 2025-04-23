@@ -1,0 +1,39 @@
+:root {
+  /* Couleurs principales */
+  --cui-primary: #321fdb;
+  --cui-secondary: #9da5b1;
+  --cui-success: #2eb85c;
+  --cui-info: #39f;
+  --cui-warning: #f9b115;
+  --cui-danger: #e55353;
+  --cui-light: #ebedef;
+  --cui-dark: #4f5d73;
+
+  /* Couleurs de texte */
+  --cui-body-color: #333;
+  --cui-body-bg: #f8f9fa;
+
+  /* Bordures */
+  --cui-border-color: #d8dbe0;
+  --cui-border-color-translucent: rgba(0, 0, 21, 0.125);
+
+  /* Espacement */
+  --cui-spacer: 1rem;
+  --cui-gutter: 1.5rem;
+
+  /* Typographie */
+  --cui-font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --cui-font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --cui-font-size-base: 1rem;
+  --cui-font-size-sm: 0.875rem;
+  --cui-font-size-lg: 1.25rem;
+
+  /* Z-index */
+  --cui-zindex-dropdown: 1000;
+  --cui-zindex-sticky: 1020;
+  --cui-zindex-fixed: 1030;
+  --cui-zindex-modal-backdrop: 1040;
+  --cui-zindex-modal: 1050;
+  --cui-zindex-popover: 1060;
+  --cui-zindex-tooltip: 1070;
+} 

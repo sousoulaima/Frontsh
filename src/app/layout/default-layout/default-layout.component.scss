@@ -1,0 +1,74 @@
+/* Couleur pour Paramétrages */
+.nav-item-settings .nav-link {
+  color: #1e40af; /* bleu foncé */
+  background-color: #e0f2fe; /* bleu clair */
+}
+
+.nav-item-settings .nav-icon {
+  color: #1e40af;
+}
+
+.nav-item-settings .nav-link:hover {
+  background-color: #dbeafe; /* bleu plus clair au survol */
+  color: #1e3a8a; /* bleu foncé au survol */
+}
+
+/* Couleur pour la Gestion des utilisateurs */
+.nav-item-users .nav-link {
+  color: #10b981; /* vert foncé */
+}
+
+.nav-item-users .nav-icon {
+  color: #10b981;
+}
+
+.nav-item-users .nav-link:hover {
+  background-color: #d1fae5; /* vert clair */
+  color: #065f46; /* vert foncé au survol */
+}
+
+/* Couleur pour la Caisse */
+.nav-item-caisse .nav-link {
+  color: #0b3d91; /* bleu foncé pour caisse */
+  background-color: #e0f7fa; /* bleu pâle pour caisse */
+}
+
+.nav-item-caisse .nav-icon {
+  color: #0b3d91;
+}
+
+.nav-item-caisse .nav-link:hover {
+  background-color: #b2ebf2; /* bleu clair au survol */
+  color: #01579b; /* bleu foncé au survol */
+}
+
+/* Couleur pour Abonnements */
+.nav-item-abonnements .nav-link {
+  color: #f59e0b; /* orange foncé */
+}
+
+.nav-item-abonnements .nav-icon {
+  color: #f59e0b;
+}
+
+.nav-item-abonnements .nav-link:hover {
+  background-color: #ffedd5; /* orange pâle au survol */
+  color: #b45309; /* orange plus foncé */
+}
+
+/* Exemple pour les sous-menus spécifiques */
+.nav-item-reglement .nav-link {
+  color: #ff5722; /* rouge pour Modalité de Règlement */
+}
+
+.nav-item-reglement .nav-link:hover {
+  background-color: #ffccbc; /* fond clair au survol */
+}
+
+.nav-item-categories .nav-link {
+  color: #9c27b0; /* violet pour Catégories Abonnements */
+}
+
+.nav-item-categories .nav-link:hover {
+  background-color: #e1bee7; /* violet clair au survol */
+}

@@ -1,0 +1,12 @@
+@import 'styles/tailwind.css';
+@import 'styles/variables.css';
+@import 'styles/mixins.css';
+@import 'styles/global.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './app/layout/default-layout/default-layout.component.scss';
+@import './app/layout/default-layout/default-header/default-header.component.scss';
+@import './app/gestion-utilisateurs/gestion-utilisateurs.component.scss';

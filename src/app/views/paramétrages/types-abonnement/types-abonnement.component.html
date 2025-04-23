@@ -1,0 +1,196 @@
+<div class="gestion-types-abonnement-container">
+  <div class="gestion-types-abonnement">
+    <!-- Modal for Adding/Editing a Subscription -->
+    <div class="modal" *ngIf="showModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditing ? 'Éditer le type d\'abonnement' : 'Ajouter un type d\'abonnement' }}</h2>
+        <form (ngSubmit)="saveSubscription()" #subscriptionForm="ngForm">
+          <div class="form-group" *ngIf="isEditing">
+            <label>Code</label>
+            <input
+              type="text"
+              [(ngModel)]="currentSubscription.code"
+              name="code"
+              readonly
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Désignation*</label>
+            <input
+              type="text"
+              [(ngModel)]="currentSubscription.designation"
+              name="designation"
+              required
+              class="form-input"
+              placeholder="Entrez la désignation"
+            />
+          </div>
+          <div class="form-group">
+            <label>Durée (mois)</label>
+            <input
+              type="number"
+              [(ngModel)]="currentSubscription.nbMois"
+              name="nbMois"
+              min="0"
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Durée (jours)</label>
+            <input
+              type="number"
+              [(ngModel)]="currentSubscription.nbJours"
+              name="nbJours"
+              min="0"
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Forfait (DT)</label>
+            <input
+              type="number"
+              [(ngModel)]="currentSubscription.forfait"
+              name="forfait"
+              min="0"
+              step="0.01"
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label>Accès Libre</label>
+            <select
+              [(ngModel)]="currentSubscription.accesLibre"
+              name="accesLibre"
+              class="form-input"
+            >
+              <option [value]="true">Oui</option>
+              <option [value]="false">Non</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Séances/semaine (-1 pour illimité)</label>
+            <input
+              type="number"
+              [(ngModel)]="currentSubscription.nbSeanceSemaine"
+              name="nbSeanceSemaine"
+              min="-1"
+              class="form-input"
+            />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="save-btn" [disabled]="!subscriptionForm.valid">Sauvegarder</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing a Subscription -->
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Détails du type d'abonnement</h2>
+        <div class="user-details">
+          <p><strong>Code :</strong> {{ viewedSubscription?.code }}</p>
+          <p><strong>Désignation :</strong> {{ viewedSubscription?.designation }}</p>
+          <p><strong>Durée (mois) :</strong> {{ viewedSubscription?.nbMois }}</p>
+          <p><strong>Durée (jours) :</strong> {{ viewedSubscription?.nbJours }}</p>
+          <p><strong>Forfait :</strong> {{ viewedSubscription?.forfait }} DT</p>
+          <p><strong>Accès Libre :</strong> {{ viewedSubscription?.accesLibre ? 'Oui' : 'Non' }}</p>
+          <p><strong>Séances/semaine :</strong> {{ viewedSubscription?.nbSeanceSemaine === -1 ? 'Illimité' : viewedSubscription?.nbSeanceSemaine }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmer la suppression</h2>
+        <p class="modal-text">Êtes-vous sûr de vouloir supprimer le type d'abonnement "{{ subscriptionToDelete?.designation }}" ?</p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
+          <button class="delete-btn" (click)="deleteSubscription()">Supprimer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-title">
+        <h1>Types d'Abonnement</h1>
+        <p>Configuration des types d'abonnement disponibles ({{ filteredSubscriptions.length }} types)</p>
+      </div>
+      <button class="add-btn" (click)="openAddSubscriptionModal()">+ Ajouter un type</button>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter">
+      <div class="search">
+        <input
+          type="text"
+          placeholder="Rechercher un type d'abonnement..."
+          [(ngModel)]="searchQuery"
+          (input)="filterSubscriptions()"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="filter-container">
+        <button class="filter-btn" (click)="toggleFilter()">Filtrer ▼</button>
+        <div class="filter-dropdown" *ngIf="showFilter">
+          <label class="filter-label">
+            Durée (mois) :
+            <select [(ngModel)]="filterDuration" (change)="filterSubscriptions()" class="filter-select">
+              <option value="">Tous</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="3">3</option>
+              <option value="12">12</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscriptions Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>CODE</th>
+            <th>DÉSIGNATION</th>
+            <th>DURÉE (MOIS)</th>
+            <th>DURÉE (JOURS)</th>
+            <th>FORFAIT</th>
+            <th>ACCÈS LIBRE</th>
+            <th>SÉANCES/SEMAINE</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let subscription of filteredSubscriptions">
+            <td>{{ subscription.code }}</td>
+            <td>{{ subscription.designation }}</td>
+            <td>{{ subscription.nbMois }}</td>
+            <td>{{ subscription.nbJours }}</td>
+            <td>{{ subscription.forfait }} DT</td>
+            <td>
+              <span class="access" [ngClass]="subscription.accesLibre ? 'yes' : 'no'">
+                {{ subscription.accesLibre ? 'Oui' : 'Non' }}
+              </span>
+            </td>
+            <td>{{ subscription.nbSeanceSemaine === -1 ? 'Illimité' : subscription.nbSeanceSemaine }}</td>
+            <td class="actions">
+              <button class="action-btn view" (click)="viewSubscription(subscription)" title="Voir">👁️</button>
+              <button class="action-btn edit" (click)="openEditSubscriptionModal(subscription)" title="Éditer">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteSubscription(subscription)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

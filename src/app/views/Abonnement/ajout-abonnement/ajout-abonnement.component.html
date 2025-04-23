@@ -1,0 +1,177 @@
+<div class="ajout-abonnement-container">
+  <div class="ajout-abonnement">
+    <div class="header">
+      <div class="header-title">
+        <h1 class="text-blue-800 animate-fade-in">Ajouter un Abonnement</h1>
+        <p class="text-gray-600 animate-fade-in">Créer un nouvel abonnement pour un adhérent</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="saveAbonnement()" #abonnementForm="ngForm" class="form-container">
+      <!-- Sélection Adhérent -->
+      <div class="form-group">
+        <label>Adhérent</label>
+        <select
+          [(ngModel)]="newAbonnement.adherent_code"
+          name="adherent_code"
+          required
+          #adherent_code="ngModel"
+          class="form-input"
+        >
+          <option value="" disabled>Sélectionner un adhérent</option>
+          <option *ngFor="let adherent of adherents" [value]="adherent.code">
+            {{ adherent.nom }} {{ adherent.prenom }} ({{ adherent.code }})
+          </option>
+        </select>
+        <span class="error" *ngIf="adherent_code.invalid && adherent_code.touched">L'adhérent est requis</span>
+      </div>
+
+      <!-- Sélection Type Abonnement -->
+      <div class="form-group">
+        <label>Type d'Abonnement</label>
+        <select
+          [(ngModel)]="newAbonnement.type_abonnement_code"
+          name="type_abonnement_code"
+          required
+          #type_abonnement_code="ngModel"
+          class="form-input"
+          (change)="onTypeChange()"
+        >
+          <option value="" disabled>Sélectionner un type</option>
+          <option *ngFor="let type of typesAbonnement" [value]="type.code">
+            {{ type.designation }} ({{ type.forfait }} DT)
+          </option>
+        </select>
+        <span class="error" *ngIf="type_abonnement_code.invalid && type_abonnement_code.touched">Le type est requis</span>
+      </div>
+
+      <!-- Catégorie -->
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select [(ngModel)]="newAbonnement.categorie_abonnement_codecateg" 
+                name="categorie_abonnement_codecateg"
+                required
+                class="form-input"
+                (change)="onCategorieChange()">
+          <option value="">Sélectionner une catégorie</option>
+          <option *ngFor="let categorie of categories" 
+                  [value]="categorie.codecateg">
+            {{ categorie.designationcateg }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Dates -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date de Début</label>
+          <input
+            type="date"
+            [(ngModel)]="newAbonnement.datedeb"
+            name="datedeb"
+            required
+            #datedeb="ngModel"
+            class="form-input"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label>Date de Fin</label>
+          <input
+            type="date"
+            [(ngModel)]="newAbonnement.datefin"
+            name="datefin"
+            class="form-input"
+            [min]="newAbonnement.datedeb"
+            
+          />
+        </div>
+      </div>
+
+      <!-- Informations financières -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total HT (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.totalhtabo"
+            name="totalhtabo"
+            class="form-input"
+            
+          />
+        </div>
+        
+        <div class="form-group">
+          <label>Remise (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.totalremise"
+            name="totalremise"
+            min="0"
+            step="0.01"
+            #totalremise="ngModel"
+            class="form-input"
+            (input)="updateFinancials()"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total TTC (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.totalttc"
+            name="totalttc"
+            class="form-input"
+            readonly
+          />
+        </div>
+        
+        <div class="form-group">
+          <label>Montant Payé (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.mtpaye"
+            name="mtpaye"
+            required
+            min="0"
+            step="0.01"
+            #mtpaye="ngModel"
+            class="form-input"
+            (input)="updateSolde()"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Reste à Payer (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.restepaye"
+            name="restepaye"
+            class="form-input"
+            readonly
+          />
+        </div>
+        
+        <div class="form-group">
+          <label>Mode de Paiement</label>
+          <select
+
+            class="form-input"
+          >
+            <option value="" disabled>Sélectionner un mode</option>
+            <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="goBack()">Retour</button>
+        <button type="submit" class="save-btn" [disabled]="!abonnementForm.valid">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
