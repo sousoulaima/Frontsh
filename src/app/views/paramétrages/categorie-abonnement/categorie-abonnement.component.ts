@@ -4,9 +4,21 @@ import { CommonModule } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { CategorieAbonnementService } from '../../../services/categorie-abonnement.service';
 
+interface TypeAbonnementDisplay {
+  code: string;
+  designation: string;
+  nbMois: number;
+  nbJours: number;
+  forfait: number;
+  accesLibre: boolean;
+  nbSeanceSemaine: number;
+}
+
 interface CategorieDisplay {
   codecateg: string;
   designationcateg: string;
+  nomcateg: string;
+  abonnements?: TypeAbonnementDisplay[];
 }
 
 @Component({
@@ -48,32 +60,33 @@ export class CategorieAbonnementComponent implements OnInit {
   loadCategories(): void {
     this.categorieService.getAll().subscribe({
       next: (data) => {
-        // Transformation des données pour ne garder que codecateg et designationcateg
         this.categories = data
-          .filter(item => item.codecateg) // Ensure codecateg is not undefined
-          .map(item => {
-            console.log('Catégories chargées:', item);
-            return {
-              codecateg: item.codecateg as string, // Explicitly cast to string
-              designationcateg: item.designationcateg || '' // Assign a default empty string if undefined
-            };
-          });
+          .filter((item) => item.codecateg)
+          .map((item) => ({
+            codecateg: item.codecateg as string,
+            designationcateg: item.designationcateg || '',
+            nomcateg: item.nomcateg || item.designationcateg || '',
+            abonnements: item.abonnements || [],
+          }));
         this.filteredCategories = [...this.categories];
+        console.log('Catégories chargées:', this.categories);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des catégories:', err);
-      }
+      },
     });
   }
 
   filterCategories(): void {
     const query = this.searchTerm.toLowerCase().trim();
-    this.filteredCategories = this.categories.filter((categorie) => {
-      return (
-        (categorie.codecateg?.toLowerCase().includes(query)) ||
-        (categorie.designationcateg.toLowerCase().includes(query))
-      );
-    });
+    this.filteredCategories = this.categories.filter(
+      (categorie) =>
+        categorie.codecateg.toLowerCase().includes(query) ||
+        categorie.designationcateg.toLowerCase().includes(query) ||
+        categorie.abonnements?.some((type) =>
+          type.designation.toLowerCase().includes(query)
+        )
+    );
   }
 
   openAddModal(): void {
@@ -94,16 +107,20 @@ export class CategorieAbonnementComponent implements OnInit {
   }
 
   saveCategorie(): void {
-    if (!this.currentCategorie.designationcateg) return;
+    if (!this.currentCategorie.designationcateg) {
+      return;
+    }
 
-    const categorieData = {
-      codecateg: this.currentCategorie.codecateg,
+    const categorieData: CategorieDisplay = {
+      codecateg: this.currentCategorie.codecateg || '', // codecateg peut être undefined en mode création
       designationcateg: this.currentCategorie.designationcateg,
-      nomcateg: this.currentCategorie.designationcateg // Si nécessaire pour le backend
+      nomcateg: this.currentCategorie.designationcateg, // Assurer que nomcateg est toujours défini
+      abonnements: this.currentCategorie.abonnements || [],
     };
 
     if (this.isEditMode && this.currentCategorie.codecateg) {
-      this.categorieService.update(this.currentCategorie.codecateg, categorieData)
+      this.categorieService
+        .update(this.currentCategorie.codecateg, categorieData)
         .subscribe({
           next: () => {
             this.loadCategories();
@@ -111,19 +128,18 @@ export class CategorieAbonnementComponent implements OnInit {
           },
           error: (err) => {
             console.error('Erreur lors de la mise à jour:', err);
-          }
+          },
         });
     } else {
-      this.categorieService.create(categorieData)
-        .subscribe({
-          next: () => {
-            this.loadCategories();
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Erreur lors de la création:', err);
-          }
-        });
+      this.categorieService.create(categorieData).subscribe({
+        next: () => {
+          this.loadCategories();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la création:', err);
+        },
+      });
     }
   }
 
@@ -149,16 +165,15 @@ export class CategorieAbonnementComponent implements OnInit {
 
   deleteCategorie(): void {
     if (this.categorieToDelete?.codecateg) {
-      this.categorieService.delete(this.categorieToDelete.codecateg)
-        .subscribe({
-          next: () => {
-            this.loadCategories();
-            this.cancelDelete();
-          },
-          error: (err) => {
-            console.error('Erreur lors de la suppression:', err);
-          }
-        });
+      this.categorieService.delete(this.categorieToDelete.codecateg).subscribe({
+        next: () => {
+          this.loadCategories();
+          this.cancelDelete();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression:', err);
+        },
+      });
     }
   }
 }

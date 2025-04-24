@@ -1,133 +1,205 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
 .ajout-abonnement-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  background: linear-gradient(to bottom right, #f0f9ff, #ecfdf5);
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
 }
 
 .ajout-abonnement {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 1200px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.green {
+  background-color: #28a745;
+}
+
+.status-text {
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.text-blue-800 {
+  color: #1e3a8a;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.header-date {
+  font-size: 12px;
+}
+
+.window-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.window-controls span {
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 5px;
+}
+
+.form-container {
+  padding: 10px;
+}
+
+.section {
+  margin-bottom: 10px;
+}
+
+.section-title {
+  display: block;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin-bottom: 5px;
+  background-color: #e0e0e0;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input {
   width: 100%;
-  max-width: 600px;
-  padding: 24px;
-  font-family: 'Inter', sans-serif;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+}
 
-  .header {
-    margin-bottom: 24px;
+.form-input[readonly] {
+  background-color: #f0f0f0;
+}
 
-    .header-title {
-      h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 8px;
-      }
+.action-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  background-color: #1e3a8a;
+  color: #fff;
+}
 
-      p {
-        font-size: 16px;
-      }
-    }
-  }
+.action-btn.pointer {
+  background-color: #dc3545;
+}
 
-  .form-container {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 24px;
+.add-btn {
+  background-color: #28a745;
+}
 
-    .form-group {
-      margin-bottom: 16px;
+.delete-btn {
+  background-color: #dc3545;
+}
 
-      label {
-        display: block;
-        font-size: 13px;
-        color: #1e40af;
-        margin-bottom: 4px;
-        font-weight: 500;
-      }
+.table-container {
+  margin-bottom: 10px;
+}
 
-      .form-input {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #bfdbfe;
-        border-radius: 6px;
-        background: #f0f9ff;
-        color: #1e40af;
-        font-size: 13px;
+.abonnement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
 
-        &:focus {
-          border-color: #2563eb;
-          outline: none;
-        }
+.abonnement-table th,
+.abonnement-table td {
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: center;
+}
 
-        &[readonly] {
-          background: #e5e7eb;
-          cursor: not-allowed;
-        }
-      }
+.abonnement-table th {
+  background-color: #1e3a8a;
+  color: #fff;
+}
 
-      .error {
-        color: #ef4444;
-        font-size: 11px;
-        margin-top: 4px;
-        display: block;
-      }
-    }
+.abonnement-table tbody tr:nth-child(even) {
+  background-color: #f0f0f0;
+}
 
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 24px;
+.actions-row {
+  justify-content: space-between;
+  align-items: center;
+}
 
-      button {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 500;
-        transition: background-color 0.3s ease;
-      }
+.paid-amount {
+  background-color: #28a745;
+  color: #fff;
+}
 
-      .cancel-btn {
-        background: #6b7280;
-        color: #ffffff;
+.remaining-amount {
+  background-color: #dc3545;
+  color: #fff;
+}
 
-        &:hover {
-          background: #4b5563;
-        }
-      }
+.save-btn {
+  padding: 5px 10px;
+  background-color: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
 
-      .save-btn {
-        background: #2563eb;
-        color: #ffffff;
+.print-btn {
+  padding: 5px 10px;
+  background-color: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
 
-        &:hover {
-          background: #1e40af;
-        }
-
-        &:disabled {
-          background: #bfdbfe;
-          cursor: not-allowed;
-        }
-      }
-    }
-  }
-
-  /* Animations */
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-  }
-  .add-btn
-  {
-      background: rgb(37 99 235);
-      color: white;
-  }
+.windows-activation,
+.settings-link,
+.escape-text {
+  font-size: 12px;
+  color: #1e3a8a;
+  cursor: pointer;
 }

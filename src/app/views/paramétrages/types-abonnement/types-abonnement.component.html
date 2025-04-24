@@ -4,6 +4,7 @@
     <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditing ? 'Éditer le type d\'abonnement' : 'Ajouter un type d\'abonnement' }}</h2>
+        <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
         <form (ngSubmit)="saveSubscription()" #subscriptionForm="ngForm">
           <div class="form-group" *ngIf="isEditing">
             <label>Code</label>
@@ -25,6 +26,20 @@
               class="form-input"
               placeholder="Entrez la désignation"
             />
+          </div>
+          <div class="form-group">
+            <label>Catégorie*</label>
+            <select
+              [(ngModel)]="currentSubscription.idCategorie"
+              name="idCategorie"
+              required
+              class="form-input"
+            >
+              <option value="">Sélectionnez une catégorie</option>
+              <option *ngFor="let categorie of categories" [value]="categorie.codecateg">
+                {{ categorie.designationcateg }}  {{ categorie.codecateg }}
+              </option>
+            </select>
           </div>
           <div class="form-group">
             <label>Durée (mois)</label>
@@ -64,8 +79,8 @@
               name="accesLibre"
               class="form-input"
             >
-              <option [value]="true">Oui</option>
-              <option [value]="false">Non</option>
+              <option [value]="1">Oui</option>
+              <option [value]="0">Non</option>
             </select>
           </div>
           <div class="form-group">
@@ -80,7 +95,13 @@
           </div>
           <div class="modal-actions">
             <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
-            <button type="submit" class="save-btn" [disabled]="!subscriptionForm.valid">Sauvegarder</button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="!subscriptionForm.valid || isLoading"
+            >
+              {{ isLoading ? 'Enregistrement...' : 'Sauvegarder' }}
+            </button>
           </div>
         </form>
       </div>
@@ -93,6 +114,7 @@
         <div class="user-details">
           <p><strong>Code :</strong> {{ viewedSubscription?.code }}</p>
           <p><strong>Désignation :</strong> {{ viewedSubscription?.designation }}</p>
+          <p><strong>Catégorie :</strong> {{ viewedSubscription?.categorieName || 'N/A' }}</p>
           <p><strong>Durée (mois) :</strong> {{ viewedSubscription?.nbMois }}</p>
           <p><strong>Durée (jours) :</strong> {{ viewedSubscription?.nbJours }}</p>
           <p><strong>Forfait :</strong> {{ viewedSubscription?.forfait }} DT</p>
@@ -162,6 +184,7 @@
           <tr>
             <th>CODE</th>
             <th>DÉSIGNATION</th>
+            <th>CATÉGORIE</th>
             <th>DURÉE (MOIS)</th>
             <th>DURÉE (JOURS)</th>
             <th>FORFAIT</th>
@@ -174,6 +197,7 @@
           <tr *ngFor="let subscription of filteredSubscriptions">
             <td>{{ subscription.code }}</td>
             <td>{{ subscription.designation }}</td>
+            <td>{{ subscription.categorieName  }}</td>
             <td>{{ subscription.nbMois }}</td>
             <td>{{ subscription.nbJours }}</td>
             <td>{{ subscription.forfait }} DT</td>
