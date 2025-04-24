@@ -1,254 +1,177 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nouveau Abonnement</title>
-  <link rel="stylesheet" href="ajout-abonnement.component.scss">
-</head>
-<body>
-  <div class="ajout-abonnement-container">
-    <div class="ajout-abonnement">
-      <!-- Header -->
-      <div class="header">
-        <div class="header-title">
-          <span class="status-dot green"></span>
-          <span class="status-text">VENTE ABONNEMENT</span>
-          <h1 class="text-blue-800">Nouveau Abonnement</h1>
+<div class="ajout-abonnement-container">
+  <div class="ajout-abonnement">
+    <div class="header">
+      <div class="header-title">
+        <h1 class="text-blue-800 animate-fade-in">Ajouter un Abonnement</h1>
+        <p class="text-gray-600 animate-fade-in">Créer un nouvel abonnement pour un adhérent</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="saveAbonnement()" #abonnementForm="ngForm" class="form-container">
+      <!-- Sélection Adhérent -->
+      <div class="form-group">
+        <label>Adhérent</label>
+        <select
+          [(ngModel)]="newAbonnement.adherent_code"
+          name="adherent_code"
+          required
+          #adherent_code="ngModel"
+          class="form-input"
+        >
+          <option value="" disabled>Sélectionner un adhérent</option>
+          <option *ngFor="let adherent of adherents" [value]="adherent.code">
+            {{ adherent.nom }} {{ adherent.prenom }} ({{ adherent.code }})
+          </option>
+        </select>
+        <span class="error" *ngIf="adherent_code.invalid && adherent_code.touched">L'adhérent est requis</span>
+      </div>
+
+      <!-- Sélection Type Abonnement -->
+      <div class="form-group">
+        <label>Type d'Abonnement</label>
+        <select
+          [(ngModel)]="newAbonnement.type_abonnement_code"
+          name="type_abonnement_code"
+          required
+          #type_abonnement_code="ngModel"
+          class="form-input"
+          (change)="onTypeChange()"
+        >
+          <option value="" disabled>Sélectionner un type</option>
+          <option *ngFor="let type of typesAbonnement" [value]="type.code">
+            {{ type.designation }} ({{ type.forfait }} DT)
+          </option>
+        </select>
+        <span class="error" *ngIf="type_abonnement_code.invalid && type_abonnement_code.touched">Le type est requis</span>
+      </div>
+
+      <!-- Catégorie -->
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select [(ngModel)]="newAbonnement.categorie_abonnement_codecateg" 
+                name="categorie_abonnement_codecateg"
+                required
+                class="form-input"
+                (change)="onCategorieChange()">
+          <option value="">Sélectionner une catégorie</option>
+          <option *ngFor="let categorie of categories" 
+                  [value]="categorie.codecateg">
+            {{ categorie.designationcateg }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Dates -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date de Début</label>
+          <input
+            type="date"
+            [(ngModel)]="newAbonnement.datedeb"
+            name="datedeb"
+            required
+            #datedeb="ngModel"
+            class="form-input"
+          />
         </div>
-        <div class="header-date">23/04/2025</div>
-        <div class="window-controls">
-          <span class="minimize">-</span>
-          <span class="maximize">□</span>
-          <span class="close">×</span>
+        
+        <div class="form-group">
+          <label>Date de Fin</label>
+          <input
+            type="date"
+            [(ngModel)]="newAbonnement.datefin"
+            name="datefin"
+            class="form-input"
+            [min]="newAbonnement.datedeb"
+            
+          />
         </div>
       </div>
 
-      <form (ngSubmit)="saveAbonnement()" #abonnementForm="ngForm" class="form-container">
-        <!-- Client existant Section -->
-        <div class="section">
-          <span class="section-title">Client Existe déjà</span>
-          <div class="form-row">
-            <div class="form-group">
-              <select [(ngModel)]="newAbonnement.adherent_code" name="adherent_code" required #adherent_code="ngModel" class="form-input">
-                <option value="" disabled>Client</option>
-                <option *ngFor="let adherent of adherents" [value]="adherent.code">
-                  {{ adherent.nom }} {{ adherent.prenom }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <select [(ngModel)]="newAbonnement.categorie_abonnement_codecateg" name="categorie_abonnement_codecateg" class="form-input">
-                <option value="">Catégorie</option>
-                <option *ngFor="let categorie of categories" [value]="categorie.codecateg">
-                  {{ categorie.designationcateg }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <select class="form-input">
-                <option value="">Sous catégorie</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <button type="button" class="action-btn pointer">Ouvrir vers pointeuse</button>
-            </div>
-            <div class="form-group">
-              <button type="button" class="action-btn">Nouveau Client</button>
-            </div>
-            <div class="form-group">
-              <button type="button" class="action-btn">Parents</button>
-            </div>
-            <div class="form-group">
-              <button type="button" class="action-btn">Emprunte</button>
-            </div>
-            <div class="form-group">
-              <button type="button" class="action-btn">Badge</button>
-            </div>
-          </div>
+      <!-- Informations financières -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total HT (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.totalhtabo"
+            name="totalhtabo"
+            class="form-input"
+            
+          />
         </div>
+        
+        <div class="form-group">
+          <label>Remise (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.totalremise"
+            name="totalremise"
+            min="0"
+            step="0.01"
+            #totalremise="ngModel"
+            class="form-input"
+            (input)="updateFinancials()"
+          />
+        </div>
+      </div>
 
-        <!-- Nombre de la classe Section -->
-        <div class="section">
-          <span class="section-title">Nombre de la classe</span>
-          <div class="form-row">
-            <div class="form-group">
-              <input type="text" class="form-input" value="Dernier ID CLIENT enregistré : 27" readonly>
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="ID POINTEUSE">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Prénom Nom">
-            </div>
-          </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total TTC (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.totalttc"
+            name="totalttc"
+            class="form-input"
+            readonly
+          />
         </div>
+        
+        <div class="form-group">
+          <label>Montant Payé (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.mtpaye"
+            name="mtpaye"
+            required
+            min="0"
+            step="0.01"
+            #mtpaye="ngModel"
+            class="form-input"
+            (input)="updateSolde()"
+          />
+        </div>
+      </div>
 
-        <!-- Étranger sous postfabille Section -->
-        <div class="section">
-          <span class="section-title">Étranger sous postfabille</span>
-          <div class="form-row">
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Nouveau Client">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Portable Société">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Premise">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Capricielle">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="D.N. CN">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Durée">
-            </div>
-          </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Reste à Payer (DT)</label>
+          <input
+            type="number"
+            [(ngModel)]="newAbonnement.restepaye"
+            name="restepaye"
+            class="form-input"
+            readonly
+          />
         </div>
+        
+        <div class="form-group">
+          <label>Mode de Paiement</label>
+          <select
 
-        <!-- Abonnement Options Table -->
-        <div class="section">
-          <span class="section-title">Abonnement</span>
-          <div class="table-container">
-            <table class="abonnement-table">
-              <thead>
-                <tr>
-                  <th>NB. MOIS</th>
-                  <th>NB.Séances</th>
-                  <th>Prix</th>
-                  <th>+NB Jour</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>0</td>
-                  <td>80,000</td>
-                  <td>0,00</td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>0</td>
-                  <td>200,000</td>
-                  <td>0,00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="abo 1 mois">
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-input" placeholder="Abonnement 3 mois musculation">
-            </div>
-          </div>
+            class="form-input"
+          >
+            <option value="" disabled>Sélectionner un mode</option>
+            <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+          </select>
         </div>
+      </div>
 
-        <!-- Abonnement Details Table -->
-        <div class="section">
-          <div class="table-container">
-            <table class="abonnement-table">
-              <thead>
-                <tr>
-                  <th>Abonnement</th>
-                  <th>NB MOIS</th>
-                  <th>Montant TTC</th>
-                  <th>Date début</th>
-                  <th>Date fin</th>
-                  <th>% Remise</th>
-                  <th>PROMO</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="form-row actions-row">
-            <button type="button" class="action-btn add-btn">Ajouter</button>
-            <button type="button" class="action-btn delete-btn">Supprimer</button>
-          </div>
-        </div>
-
-        <!-- Summary Section -->
-        <div class="section">
-          <div class="form-row actions-row">
-            <div class="form-group">
-              <label>TOTAL</label>
-              <input type="text" class="form-input" value="0,000" readonly>
-            </div>
-            <div class="form-group">
-              <label>Remise %</label>
-              <input type="text" class="form-input" value="0,0000" readonly>
-            </div>
-            <div class="form-group">
-              <label>MT/AP/REM</label>
-              <input type="text" class="form-input" value="0,000" readonly>
-            </div>
-            <button type="button" class="action-btn">Imprimer</button>
-          </div>
-        </div>
-
-        <!-- Payment Section -->
-        <div class="section">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Date</label>
-              <input type="date" class="form-input">
-            </div>
-            <div class="form-group">
-              <label>Montant</label>
-              <input type="text" class="form-input">
-            </div>
-            <div class="form-group">
-              <label>Modalité</label>
-              <select class="form-input">
-                <option value="">Cent</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Banque</label>
-              <select class="form-input">
-                <option value="">N° CHO</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Montant payé</label>
-              <input type="text" class="form-input paid-amount" value="0,000">
-            </div>
-            <div class="form-group">
-              <label>Reste à payer</label>
-              <input type="text" class="form-input remaining-amount" value="0,000" readonly>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="section">
-          <div class="form-row actions-row">
-            <button type="submit" class="save-btn">Enregistrer tout</button>
-            <span class="windows-activation">Activer Windows</span>
-            <span class="settings-link">Accédez aux paramètres</span>
-            <button type="button" class="print-btn">Imprimer réagir</button>
-            <span class="escape-text">Fermer(Échap)</span>
-          </div>
-        </div>
-      </form>
-    </div>
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="goBack()">Retour</button>
+        <button type="submit" class="save-btn" [disabled]="!abonnementForm.valid">Enregistrer</button>
+      </div>
+    </form>
   </div>
-</body>
-</html>
+</div>

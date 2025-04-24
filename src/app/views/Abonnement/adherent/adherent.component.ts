@@ -181,6 +181,7 @@ export class AdherentComponent implements OnInit {
   }
 
   saveAdherent(): void {
+    console.log(this.currentAdherent);
     console.log('saveAdherent called');
     console.log('Current Adherent:', this.currentAdherent);
 
@@ -226,7 +227,7 @@ export class AdherentComponent implements OnInit {
             this.backendErrors = ['Erreur lors de la mise à jour de l\'adhérent: ' + (err.error?.message || 'Veuillez réessayer')];
           }
           console.log('Backend Errors:', this.backendErrors);
-          alert('Erreur: ' + this.backendErrors.join(', ')); // Show backend errors to user
+          alert('Erreur1: ' + this.backendErrors.join(', ')); // Show backend errors to user
         }
       });
     } else {
@@ -245,7 +246,7 @@ export class AdherentComponent implements OnInit {
             this.backendErrors = ['Erreur lors de l\'ajout de l\'adhérent: ' + (err.error?.message || 'Veuillez réessayer')];
           }
           console.log('Backend Errors:', this.backendErrors);
-          alert('Erreur: ' + this.backendErrors.join(', ')); // Show backend errors to user
+          alert('Erreur2: ' + this.backendErrors.join(', ')); // Show backend errors to user
         }
       });
     }

@@ -124,7 +124,7 @@ export class AjoutAbonnementComponent implements OnInit {
     this.abonnementService.createAbonnement(this.newAbonnement).subscribe({
       next: () => {
         alert('Abonnement créé avec succès');
-        this.router.navigate(['/liste-abonnement']);
+        this.router.navigate(['abonnement/listeAbonnement']);
       },
       error: (err) => {
         console.error('Erreur:', err);
@@ -134,6 +134,6 @@ export class AjoutAbonnementComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/liste-abonnement']);
+    this.router.navigate(['abonnement/listeAbonnement']);
   }
 }
