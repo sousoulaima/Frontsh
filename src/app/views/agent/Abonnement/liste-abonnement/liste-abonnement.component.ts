@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { AbonnementService, Abonnement, Adherent, TypeAbonnement, CategorieAbonnement } from '../../../services/abonnement.service';
+import { AbonnementService, Abonnement, Adherent, TypeAbonnement, CategorieAbonnement } from '../../../../services/abonnement.service';
 import { forkJoin } from 'rxjs';
 
 interface EnrichedAbonnement extends Abonnement {
@@ -81,23 +81,8 @@ export class ListeAbonnementComponent implements OnInit {
           const type = results.types.find(t => t.code === abonnement.type_abonnement_code);
           const categorie = results.categories.find(c => c.codecateg === abonnement.categorie_abonnement_codecateg);
           
-          // تحويل القيم إلى أرقام مع إزالة النصوص الزايدة
-          const updatedAbonnement = {
-            ...abonnement,
-            totalhtabo: Number(String(abonnement.totalhtabo).replace(' DT', '')) || 0,
-            totalremise: Number(String(abonnement.totalremise).replace(' DT', '')) || 0,
-            totalht: Number(String(abonnement.totalht).replace(' DT', '')) || 0,
-            totalttc: Number(String(abonnement.totalttc).replace(' DT', '')) || 0,
-            mtpaye: Number(String(abonnement.mtpaye).replace(' DT', '')) || 0,
-            restepaye: Number(String(abonnement.restepaye).replace(' DT', '')) || 0
-          };
-
-          // تحديث القيم المالية
-          this.updateFinancials(updatedAbonnement);
-
           return {
-            ...updatedAbonnement,
-            solde: this.isSoldeOui(updatedAbonnement.restepaye), // استخدام الدالة isSoldeOui
+            ...abonnement,
             adherentName: adherent ? `${adherent.nom} ${adherent.prenom}` : 'Inconnu',
             typeDesignation: type ? type.designation : 'Inconnu',
             categorieDesignation: categorie ? categorie.designationcateg : 'Inconnu'
@@ -105,7 +90,6 @@ export class ListeAbonnementComponent implements OnInit {
         });
 
         this.filteredAbonnements = [...this.abonnements];
-        console.log('Abonnements après chargement:', this.abonnements); // للتحقق
       },
       error: (err) => {
         console.error('Erreur lors du chargement des données:', err);
@@ -127,7 +111,12 @@ export class ListeAbonnementComponent implements OnInit {
       const matchesType = this.filterType ? 
         abonnement.typeDesignation === this.filterType : true;
       
-      return matchesSearch && matchesType;
+      const matchesMiPaye = this.filterMiPaye ? 
+        (typeof abonnement.mtpaye === 'string' ? 
+         abonnement.mtpaye === this.filterMiPaye.toLowerCase() : 
+         false) : true;
+      
+      return matchesSearch && matchesType && matchesMiPaye;
     });
   }
 
@@ -138,7 +127,6 @@ export class ListeAbonnementComponent implements OnInit {
   openEditAbonnementModal(abonnement: EnrichedAbonnement): void {
     this.isEditing = true;
     this.currentAbonnement = { ...abonnement };
-    this.updateFinancials(this.currentAbonnement); // تحديث القيم قبل فتح المودال
     this.showModal = true;
   }
 
@@ -162,21 +150,20 @@ export class ListeAbonnementComponent implements OnInit {
     this.currentAbonnement = {};
   }
 
-  updateFinancials(abonnement: Partial<Abonnement>): void {
-    const totalHTAbo = Number(String(abonnement.totalhtabo).replace(' DT', '')) || 0;
-    const totalRemise = Number(String(abonnement.totalremise).replace(' DT', '')) || 0;
+  updateFinancials(): void {
+    const totalHTAbo = this.currentAbonnement.totalhtabo || 0;
+    const totalRemise = this.currentAbonnement.totalremise || 0;
     const taxRate = 0.19; // TVA 19%
     
-    // حساب TotalHT و TotalTTC
-    abonnement.totalht = totalHTAbo - totalRemise;
-    abonnement.totalttc = Number(((abonnement.totalht || 0) * (1 + taxRate)).toFixed(2)); // تقريب إلى 2 أرقام عشرية
+    this.currentAbonnement.totalht = totalHTAbo - totalRemise;
+    this.currentAbonnement.totalttc = (this.currentAbonnement.totalht || 0) * (1 + taxRate);
     
-    // حساب Restepayee بناءً على TotalTTC و MTPaye
-    const mtpaye = Number(String(abonnement.mtpaye).replace(' DT', '')) || 0;
-    abonnement.restepaye = Number((abonnement.totalttc - mtpaye).toFixed(2)); // تقريب إلى 2 أرقام عشرية
-    
-    // تحديث Solde
-    abonnement.solde = this.isSoldeOui(abonnement.restepaye);
+    if (this.currentAbonnement.solde) {
+      this.currentAbonnement.restepaye = 0;
+      this.currentAbonnement.mtpaye = this.currentAbonnement.totalttc;
+    } else {
+      this.currentAbonnement.restepaye = (this.currentAbonnement.totalttc || 0) - (this.currentAbonnement.mtpaye || 0);
+    }
   }
 
   updateDateFin(): void {
@@ -202,9 +189,6 @@ export class ListeAbonnementComponent implements OnInit {
 
   saveAbonnement(): void {
     if (!this.currentAbonnement) return;
-
-    // تحديث Solde قبل الحفظ
-    this.updateFinancials(this.currentAbonnement);
 
     if (this.isEditing && this.currentAbonnement.codeabo) {
       this.abonnementService.update(this.currentAbonnement.codeabo, this.currentAbonnement as Abonnement)
@@ -283,13 +267,5 @@ export class ListeAbonnementComponent implements OnInit {
       default:
         return '';
     }
-  }
-
-  // floating point
-  isSoldeOui(restepaye: number | string | undefined): boolean {
-    if (restepaye === undefined) return false;
-    const cleanValue = String(restepaye).replace(' DT', '').trim();
-    const roundedValue = Number(Number(cleanValue).toFixed(2)); // تقريب إلى 2 أرقام عشرية
-    return roundedValue === 0;
   }
 }

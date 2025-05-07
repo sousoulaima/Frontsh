@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AbonnementService, Abonnement, Adherent, TypeAbonnement, CategorieAbonnement } from '../../../services/abonnement.service';
-import { ModaliteRegService, ModaliteReg } from '../../../services/modalite-reg.service';
+import { AbonnementService, Abonnement, Adherent, TypeAbonnement, CategorieAbonnement } from '../../../../services/abonnement.service';
+import { ModaliteRegService, ModaliteReg } from '../../../../services/modalite-reg.service';
 @Component({
   selector: 'app-ajout-abonnement',
   standalone: true,
@@ -205,7 +205,7 @@ export class AjoutAbonnementComponent implements OnInit {
         alert('Abonnement créé avec succès');
         this.router.navigate(['abonnement/listeAbonnement']);
       },
-      error: (err) => {
+      error: (err:any) => {
         console.error('Erreur:', err);
         alert('Erreur lors de la création de l\'abonnement');
       }

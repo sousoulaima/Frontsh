@@ -1,0 +1,205 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
+.ajout-abonnement-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.ajout-abonnement {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 1200px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.green {
+  background-color: #28a745;
+}
+
+.status-text {
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+.text-blue-800 {
+  color: #1e3a8a;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.header-date {
+  font-size: 12px;
+}
+
+.window-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.window-controls span {
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 5px;
+}
+
+.form-container {
+  padding: 10px;
+}
+
+.section {
+  margin-bottom: 10px;
+}
+
+.section-title {
+  display: block;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin-bottom: 5px;
+  background-color: #e0e0e0;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-input {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.form-input[readonly] {
+  background-color: #f0f0f0;
+}
+
+.action-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  background-color: #1e3a8a;
+  color: #fff;
+}
+
+.action-btn.pointer {
+  background-color: #dc3545;
+}
+
+.add-btn {
+  background-color: #28a745;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+}
+
+.table-container {
+  margin-bottom: 10px;
+}
+
+.abonnement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.abonnement-table th,
+.abonnement-table td {
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: center;
+}
+
+.abonnement-table th {
+  background-color: #1e3a8a;
+  color: #fff;
+}
+
+.abonnement-table tbody tr:nth-child(even) {
+  background-color: #f0f0f0;
+}
+
+.actions-row {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.paid-amount {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.remaining-amount {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.save-btn {
+  padding: 5px 10px;
+  background-color: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.print-btn {
+  padding: 5px 10px;
+  background-color: #1e3a8a;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.windows-activation,
+.settings-link,
+.escape-text {
+  font-size: 12px;
+  color: #1e3a8a;
+  cursor: pointer;
+}

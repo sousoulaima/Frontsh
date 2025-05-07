@@ -1,4 +1,4 @@
-.gestion-reglements-container {
+.gestion-adherents-container {
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -6,7 +6,7 @@
     background: linear-gradient(to bottom right, #f0f9ff, #ecfdf5);
   }
   
-  .gestion-reglements {
+  .gestion-adherents {
     width: 100%;
     max-width: 1200px;
     padding: 24px;
@@ -33,22 +33,12 @@
         }
       }
   
-      .actions {
-        .add-btn {
-          padding: 12px 24px;
-          border: none;
-          border-radius: 8px;
-          background: #2563eb;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-  
-          &:hover {
-            background: #1e40af;
-          }
-        }
+      .add-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+        white-space: nowrap;
       }
     }
   
@@ -90,6 +80,56 @@
           transform: translateY(-50%);
           font-size: 18px;
           color: #2563eb;
+        }
+      }
+  
+      .filter-container {
+        position: relative;
+  
+        .filter-btn {
+          padding: 12px 24px;
+          border: 1px solid #bfdbfe;
+          border-radius: 8px;
+          background: #ffffff;
+          color: #1e40af;
+          font-size: 14px;
+          font-weight: 500;
+          transition: background-color 0.3s ease;
+  
+          &:hover {
+            background: #f0f9ff;
+          }
+        }
+  
+        .filter-dropdown {
+          position: absolute;
+          top: 48px;
+          right: 0;
+          width: 240px;
+          background: #ffffff;
+          border: 1px solid #bfdbfe;
+          border-radius: 8px;
+          padding: 16px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          z-index: 100;
+  
+          .filter-label {
+            display: block;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #1e40af;
+  
+            .filter-select {
+              width: 100%;
+              padding: 8px;
+              border: 1px solid #bfdbfe;
+              border-radius: 6px;
+              background: #f0f9ff;
+              color: #1e40af;
+              font-size: 14px;
+              margin-top: 4px;
+            }
+          }
         }
       }
     }
@@ -185,7 +225,7 @@
         border-radius: 8px;
         padding: 20px;
         width: 100%;
-        max-width: 600px;
+        max-width: 500px;
         min-width: 300px;
         max-height: 90vh;
         overflow-y: auto;
@@ -209,46 +249,15 @@
           margin-bottom: 12px;
         }
   
-        .form-section {
-          margin-bottom: 16px;
-  
-          h3 {
-            font-size: 16px;
-            color: #1e40af;
-            margin-bottom: 12px;
-            font-weight: 500;
-          }
-  
-          .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-  
-            @media (max-width: 600px) {
-              grid-template-columns: 1fr;
-            }
-  
-            .full-width {
-              grid-column: 1 / -1;
-            }
-          }
-        }
-  
         .form-group {
           margin-bottom: 12px;
   
           label {
-            display: flex;
-            align-items: center;
+            display: block;
             font-size: 13px;
             color: #1e40af;
             margin-bottom: 4px;
             font-weight: 500;
-  
-            .required {
-              color: #ef4444;
-              margin-left: 4px;
-            }
           }
   
           .form-input {
@@ -259,27 +268,6 @@
             background: #f0f9ff;
             color: #1e40af;
             font-size: 13px;
-  
-            &:focus {
-              border-color: #2563eb;
-              outline: none;
-            }
-  
-            &.invalid {
-              border-color: #ef4444;
-            }
-          }
-  
-          textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #bfdbfe;
-            border-radius: 6px;
-            background: #f0f9ff;
-            color: #1e40af;
-            font-size: 13px;
-            resize: vertical;
-            min-height: 80px;
   
             &:focus {
               border-color: #2563eb;
@@ -304,7 +292,7 @@
   
             strong {
               display: inline-block;
-              width: 120px;
+              width: 100px;
               font-weight: 600;
               color: #1e40af;
             }
@@ -369,6 +357,7 @@
       }
     }
   
+    /* Animations */
     @keyframes fade-in {
       from {
         opacity: 0;
@@ -386,6 +375,17 @@
       to {
         transform: translateX(0);
         opacity: 1;
+      }
+    }
+  
+    @keyframes modal-open {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
       }
     }
   
@@ -408,5 +408,10 @@
     }
     .animation-delay-300 {
       animation-delay: 300ms;
+    }
+    .add-btn
+    {
+        background: rgb(37 99 235);
+        color: white;
     }
   }

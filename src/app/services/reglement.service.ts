@@ -2,19 +2,24 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-interface Reglement {
-  codereg: number;
+export interface Reglement {
+  codereg?: number;
   datereg: string; // Format ISO 8601: "2025-04-20T00:00:00.000000Z"
   mtreg: string;
   numchq?: string; // Le "?" indique que ce champ est optionnel
   numtraite?: string; // Le "?" indique que ce champ est optionnel
   commentaire?: string; // Le "?" indique que ce champ est optionnel
-  abonnement_codeabo: number;
-  abonnement: Abonnement;
+  modalite_reg?: string; // الحقل الأصلي
+  modaliteReg?: string; // احتمال يكون الـ API بترجع هذا الاسم
+  modalite_reg_id?: string; // احتمال آخر
+  abonnement_codeabo?: number; // الحقل الأصلي
+  abonnementCodeabo?: number; // احتمال يكون الـ API بترجع هذا الاسم
+  abonnement_id?: number; // احتمال آخر
+  abonnement?: Abonnement; // جعلها اختيارية عشان الـ API ممكن ما ترجعش كائن كامل
 }
 
 interface Abonnement {
-  codeabo: number;
+  codeabo?: number;
   dateabo: string; // Format ISO 8601: "2025-04-19T00:00:00.000000Z"
   totalhtabo: string;
   totalremise: string;

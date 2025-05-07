@@ -23,8 +23,17 @@ export class LoginComponent {
   onSubmit(): void {
     this.showError = false;
     this.authService.login(this.email, this.password).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
+      next: (rep:any) => {   
+        console.log(rep.user);
+        localStorage.setItem('role',rep.user['role']);
+        if(rep.user['role'] == "Administrateur"){
+           this.router.navigate(['/dashboard']);
+        }
+        if(rep.user['role'] == "Agent Accueil"){
+          console.log(rep.user['role']);
+          this.router.navigate(['/agent-dashboard']);
+       }
+       
       },
       error: (error) => {
         this.showError = true;

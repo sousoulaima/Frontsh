@@ -1,51 +1,85 @@
 <ng-container>
-  <c-container [fluid]="true" class="bg-white border-b border-blue-200 px-4 shadow-sm">
+  <c-container [fluid]="true" class="bg-gradient-to-r from-gray-100 to-blue-100 border-b border-blue-200 px-4 py-3 shadow-sm">
     <!-- Sidebar Toggle Button -->
     <button
       [cSidebarToggle]="sidebarId()"
       cHeaderToggler
-      class="btn text-blue-600 hover:text-blue-800 transition-colors duration-300"
+      class="btn text-blue-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
       toggle="visible"
-      style="margin-inline-start: -14px;"
-      aria-label="Basculer la navigation latérale"
+      style="margin-inline-start: -12px;"
+      aria-label="Basculer la barre latérale"
     >
       <svg cIcon name="cilMenu" size="lg" class="w-6 h-6"></svg>
     </button>
 
     <!-- Navigation Links -->
-    <c-header-nav class="d-none d-md-flex ml-6">
+    <c-header-nav class="hidden md:flex ml-6 gap-4">
       <c-nav-item>
-        <a cNavLink routerLink="/dashboard" routerLinkActive="active" class="text-blue-700 hover:text-blue-900 font-medium transition-colors duration-300">Tableau de bord</a>
+        <a
+          cNavLink
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          class="text-blue-700 hover:text-blue-900 font-semibold text-sm px-3 py-2 rounded-md hover:bg-blue-50 transition-all duration-200"
+          aria-current="page"
+        >
+          Tableau de bord
+        </a>
       </c-nav-item>
       <c-nav-item>
-        <a cNavLink routerLink="/users" routerLinkActive="active" class="text-blue-700 hover:text-blue-900 font-medium transition-colors duration-300">Utilisateurs</a>
+        <a
+          cNavLink
+          routerLink="/users"
+          routerLinkActive="active"
+          class="text-blue-700 hover:text-blue-900 font-semibold text-sm px-3 py-2 rounded-md hover:bg-blue-50 transition-all duration-200"
+        >
+          Utilisateurs
+        </a>
       </c-nav-item>
       <c-nav-item>
-        <a cNavLink routerLink="/settings" routerLinkActive="active" class="text-blue-700 hover:text-blue-900 font-medium transition-colors duration-300">Paramètres</a>
+        <a
+          cNavLink
+          routerLink="/settings"
+          routerLinkActive="active"
+          class="text-blue-700 hover:text-blue-900 font-semibold text-sm px-3 py-2 rounded-md hover:bg-blue-50 transition-all duration-200"
+        >
+          Paramètres
+        </a>
       </c-nav-item>
     </c-header-nav>
 
     <!-- Right-Side Icons -->
-    <c-header-nav class="d-none d-md-flex ms-auto">
-      <a cNavLink class="text-blue-600 hover:text-accent-orange transition-colors duration-300">
-        <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
+    <c-header-nav class="hidden md:flex ms-auto gap-3">
+      <a
+        cNavLink
+        class="text-blue-600 hover:text-orange-600 transition-colors duration-200 p-2 rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        aria-label="Notifications"
+      >
+        <svg cIcon name="cilBell" size="md" class="w-5 h-5"></svg>
       </a>
-      <a cNavLink class="text-blue-600 hover:text-accent-purp transition-colors duration-300">
-        <svg cIcon class="my-1" name="cilList" size="lg"></svg>
+      <a
+        cNavLink
+        class="text-blue-600 hover:text-purple-600 transition-colors duration-200 p-2 rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        aria-label="Liste des tâches"
+      >
+        <svg cIcon name="cilList" size="md" class="w-5 h-5"></svg>
       </a>
-      <a cNavLink class="text-blue-600 hover:text-highlight-green transition-colors duration-300">
-        <svg cIcon class="my-1" name="cilEnvelopeOpen" size="lg"></svg>
+      <a
+        cNavLink
+        class="text-blue-600 hover:text-green-600 transition-colors duration-200 p-2 rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        aria-label="Messages"
+      >
+        <svg cIcon name="cilEnvelopeOpen" size="md" class="w-5 h-5"></svg>
       </a>
     </c-header-nav>
 
     <!-- Theme and User Dropdowns -->
-    <c-header-nav class="ms-auto ms-md-0">
+    <c-header-nav class="ms-auto md:ms-0 flex items-center">
       <div class="nav-item py-1">
-        <div class="vr h-100 mx-2 bg-blue-200"></div>
+        <div class="vr h-6 mx-3 bg-blue-200"></div>
       </div>
       <ng-container *ngTemplateOutlet="themeDropdown" />
       <div class="nav-item py-1">
-        <div class="vr h-100 mx-2 bg-blue-200"></div>
+        <div class="vr h-6 mx-3 bg-blue-200"></div>
       </div>
     </c-header-nav>
 
@@ -57,91 +91,137 @@
 
 <!-- User Dropdown -->
 <ng-template #userDropdown>
-  <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
-    <button [caret]="false" cDropdownToggle class="py-0 pe-0 flex items-center" aria-label="Ouvrir le menu utilisateur">
+  <c-dropdown [popperOptions]="{ placement: 'bottom-end' }" variant="nav-item">
+    <button
+      [caret]="false"
+      cDropdownToggle
+      class="py-0 pe-0 flex items-center gap-3"
+      aria-label="Ouvrir le menu utilisateur"
+    >
       <c-avatar
-        shape="rounded-1"
-        [size]="'lg'"
+        shape="rounded-full"
+        size="custom"
+        class="w-12 h-12"
         src="assets/images/logo.jpg"
         status="success"
         textColor="blue-600"
         alt="Avatar utilisateur"
       />
-      <span class="ml-2 text-blue-700 font-medium">Administrateur Soulaima</span>
+      <span class="text-blue-700 font-semibold text-sm">Administrateur Soulaima</span>
     </button>
-    <ul cDropdownMenu class="pt-0 w-64 bg-white border border-blue-200 shadow-lg">
+    <ul cDropdownMenu class="py-2 w-60 bg-white border border-blue-100 shadow-md rounded-lg">
       <li>
-        <h6 cDropdownHeader class="bg-light-bg text-blue-700 fw-semibold py-2 rounded-top">Compte</h6>
+        <h6 cDropdownHeader class="bg-blue-50 text-blue-800 font-semibold py-2 px-4">Compte</h6>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilBell"></svg>
+        <a
+          cDropdownItem
+          routerLink="/updates"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilBell" size="sm" class="w-4 h-4"></svg>
           Mises à jour
-          <c-badge class="ms-2 float-end" color="highlight-green">42</c-badge>
+          <c-badge class="ms-auto" color="info">42</c-badge>
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="/apps/email/inbox" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilEnvelopeOpen"></svg>
+        <a
+          cDropdownItem
+          routerLink="/apps/email/inbox"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilEnvelopeOpen" size="sm" class="w-4 h-4"></svg>
           Messages
-          <c-badge class="ms-2 float-end" color="success">42</c-badge>
+          <c-badge class="ms-auto" color="success">42</c-badge>
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilTask"></svg>
+        <a
+          cDropdownItem
+          routerLink="/tasks"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilTask" size="sm" class="w-4 h-4"></svg>
           Tâches
-          <c-badge class="ms-2 float-end" color="danger">42</c-badge>
+          <c-badge class="ms-auto" color="danger">42</c-badge>
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilCommentSquare"></svg>
+        <a
+          cDropdownItem
+          routerLink="/comments"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilCommentSquare" size="sm" class="w-4 h-4"></svg>
           Commentaires
           <c-badge class="ms-auto" color="warning">42</c-badge>
         </a>
       </li>
       <li>
-        <h6 cDropdownHeader class="bg-light-bg text-blue-700 fw-semibold py-2">Paramètres</h6>
+        <h6 cDropdownHeader class="bg-blue-50 text-blue-800 font-semibold py-2 px-4">Paramètres</h6>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilUser"></svg>
+        <a
+          cDropdownItem
+          routerLink="/profile"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilUser" size="sm" class="w-4 h-4"></svg>
           Profil
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilSettings"></svg>
+        <a
+          cDropdownItem
+          routerLink="/settings"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilSettings" size="sm" class="w-4 h-4"></svg>
           Paramètres
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilCreditCard"></svg>
+        <a
+          cDropdownItem
+          routerLink="/payments"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilCreditCard" size="sm" class="w-4 h-4"></svg>
           Paiements
-          <c-badge class="ms-2 float-end" color="secondary">42</c-badge>
+          <c-badge class="ms-auto" color="secondary">42</c-badge>
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilFile"></svg>
+        <a
+          cDropdownItem
+          routerLink="/projects"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilFile" size="sm" class="w-4 h-4"></svg>
           Projets
-          <c-badge class="ms-2 float-end" color="accent-purple">42</c-badge>
+          <c-badge class="ms-auto" color="primary">42</c-badge>
         </a>
       </li>
       <li>
-        <hr cDropdownDivider class="border-blue-200" />
+        <hr cDropdownDivider class="border-blue-200 my-1" />
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilLockLocked"></svg>
+        <a
+          cDropdownItem
+          routerLink="/lock"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilLockLocked" size="sm" class="w-4 h-4"></svg>
           Verrouiller le compte
         </a>
       </li>
       <li>
-        <a cDropdownItem routerLink="" class="text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300">
-          <svg cIcon class="me-2" name="cilAccountLogout"></svg>
+        <a
+          cDropdownItem
+          routerLink="/logout"
+          class="text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 flex items-center"
+        >
+          <svg cIcon class="me-2" name="cilAccountLogout" size="sm" class="w-4 h-4"></svg>
           Déconnexion
         </a>
       </li>
@@ -152,18 +232,23 @@
 <!-- Theme Dropdown -->
 <ng-template #themeDropdown>
   <c-dropdown alignment="end" variant="nav-item">
-    <button [caret]="false" cDropdownToggle aria-label="Ouvrir le sélecteur de thème" class="text-blue-600 hover:text-blue-800 transition-colors duration-300">
-      <svg cIcon [name]="icons()" size="lg" class="w-6 h-6"></svg>
+    <button
+      [caret]="false"
+      cDropdownToggle
+      aria-label="Ouvrir le sélecteur de thème"
+      class="text-blue-600 hover:text-blue-800 transition-colors duration-200 p-2 rounded-full hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+      <svg cIcon [name]="icons()" size="md" class="w-6 h-6"></svg>
     </button>
-    <div cDropdownMenu class="bg-white border border-blue-200 shadow-lg">
+    <div cDropdownMenu class="bg-white border border-blue-100 shadow-md rounded-lg py-2 w-44">
       @for (mode of colorModes; track mode.name) {
         <button
           (click)="colorMode.set(mode.name)"
           [active]="colorMode() === mode.name"
           cDropdownItem
-          class="d-flex align-items-center text-blue-700 hover:bg-light-blue hover:text-blue-900 transition-colors duration-300"
+          class="flex items-center text-blue-700 hover:bg-blue-50 hover:text-blue-900 font-medium px-4 py-2 transition-all duration-200 w-full text-left"
         >
-          <svg cIcon class="me-2" [name]="mode.icon" size="lg"></svg>
+          <svg cIcon class="me-2" [name]="mode.icon" size="sm" class="w-4 h-4"></svg>
           {{ mode.text }}
         </button>
       }

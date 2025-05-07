@@ -1,0 +1,214 @@
+<div class="gestion-salles-container">
+  <div class="gestion-salles">
+    <div class="modal" *ngIf="showModal">
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditing ? 'Modifier la salle' : 'Ajouter une salle' }}</h2>
+        <form (ngSubmit)="saveSalle()" #salleForm="ngForm">
+          <div class="form-section">
+            <h3>Informations de base</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Désignation <span class="required">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="currentSalle.designationsalle"
+                  name="designationsalle"
+                  #designationsalle="ngModel"
+                  required
+                  class="form-input"
+                  placeholder="Nom de la salle"
+                  [ngClass]="{'invalid': designationsalle.invalid && (designationsalle.dirty || designationsalle.touched)}"
+                />
+                <span class="error" *ngIf="designationsalle.invalid && (designationsalle.dirty || designationsalle.touched)">La désignation est obligatoire</span>
+              </div>
+
+              <div class="form-group">
+                <label>Capacité <span class="required">*</span></label>
+                <input
+                  type="number"
+                  [(ngModel)]="currentSalle.capacitesalle"
+                  name="capacitesalle"
+                  #capacitesalle="ngModel"
+                  required
+                  min="1"
+                  class="form-input"
+                  (change)="updatePriveStatus()"
+                  [ngClass]="{'invalid': capacitesalle.invalid && (capacitesalle.dirty || capacitesalle.touched)}"
+                />
+                <span class="error" *ngIf="capacitesalle.invalid && (capacitesalle.dirty || capacitesalle.touched)">La capacité doit être au moins 1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Tarification</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Prix par jour</label>
+                <select
+                  [(ngModel)]="currentSalle.prixJour"
+                  name="prixJour"
+                  class="form-select"
+                  (change)="updatePriveStatus()"
+                >
+                  <option *ngFor="let option of prixOptions" [value]="option.value" [selected]="option.value === currentSalle.prixJour">
+                    {{ option.label }}
+                  </option>
+                </select>
+                <small *ngIf="currentSalle.prixJour && currentSalle.prixJour > 30" class="text-success">
+                  <i class="fas fa-lock"></i> Ce tarif est considéré comme privé
+                </small>
+              </div>
+
+              <div class="form-group">
+                <label>Prix par heure</label>
+                <select
+                  [(ngModel)]="currentSalle.prixHeure"
+                  name="prixHeure"
+                  class="form-select"
+                  (change)="updatePriveStatus()"
+                >
+                  <option *ngFor="let option of prixOptions" [value]="option.value" [selected]="option.value === currentSalle.prixHeure">
+                    {{ option.label }}
+                  </option>
+                </select>
+                <small *ngIf="currentSalle.prixHeure && currentSalle.prixHeure > 30" class="text-success">
+                  <i class="fas fa-lock"></i> Ce tarif est considéré comme privé
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="currentSalle.prives_j || currentSalle.prives_n">
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i> Cette salle est configurée comme privée (capacité > 20 et prix > 30 DT)
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="save-btn" [disabled]="!salleForm.valid">
+              <i class="fas fa-save"></i> {{ isEditing ? 'Mettre à jour' : 'Enregistrer' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" *ngIf="showViewModal">
+      <div class="modal-content">
+        <h2 class="modal-title">Détails de la salle</h2>
+        <div class="salle-details">
+          <div class="detail-item">
+            <span class="detail-label">Code:</span>
+            <span class="detail-value">{{ viewedSalle?.codesalle || 'N/A' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Désignation:</span>
+            <span class="detail-value">{{ viewedSalle?.designationsalle }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Capacité:</span>
+            <span class="detail-value">{{ viewedSalle?.capacitesalle }} personnes</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prix journée:</span>
+            <span class="detail-value">{{ viewedSalle?.prives_j ? '35 DT (Privé)' : '25 DT (Standard)' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prix heure:</span>
+            <span class="detail-value">{{ viewedSalle?.prives_n ? '35 DT (Privé)' : '25 DT (Standard)' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Statut:</span>
+            <span class="detail-value">
+              <span class="badge" [ngClass]="{'badge-success': viewedSalle?.prives_j || viewedSalle?.prives_n, 'badge-secondary': !(viewedSalle?.prives_j || viewedSalle?.prives_n)}">
+                {{ getPriveLabel(!!(viewedSalle?.prives_j || viewedSalle?.prives_n)) }}
+              </span>
+            </span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="close-btn" (click)="closeViewModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" *ngIf="showDeleteConfirm">
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmation de suppression</h2>
+        <div class="confirmation-message">
+          <p>Êtes-vous sûr de vouloir supprimer la salle suivante ?</p>
+          <div class="salle-info">
+            <strong>{{ salleToDelete?.designationsalle }}</strong> (Capacité: {{ salleToDelete?.capacitesalle }} personnes)
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" (click)="cancelDelete()">Annuler</button>
+          <button type="button" class="delete-btn" (click)="deleteSalle()">
+            <i class="fas fa-trash-alt"></i> Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="header">
+      <div class="header-title">
+        <h1 class="text-blue-800 animate-fade-in"><i class="fas fa-chalkboard-teacher"></i> Gestion des salles de formation</h1>
+        <p class="text-gray-600 animate-fade-in">Total: {{ filteredSalles.length }} salle(s)</p>
+      </div>
+      <div class="actions">
+        <button class="add-btn" (click)="openAddSalleModal()">
+          <i class="fas fa-plus"></i> Ajouter une salle
+        </button>
+      </div>
+    </div>
+
+    <div class="search-filter">
+      <div class="search">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Rechercher une salle..."
+          [(ngModel)]="searchQuery"
+          (input)="filterSalles()"
+        />
+        <span class="search-icon"><i class="fas fa-search"></i></span>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>CODE</th>
+            <th>Désignation</th>
+            <th>Capacité</th>
+            <th>Prix/jour</th>
+            <th>Prix/heure</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let salle of filteredSalles; let i = index" class="animate-slide-in-right" [ngClass]="'animation-delay-' + (i * 100)">
+            <td>{{ salle.codesalle }}</td>
+            <td>{{ salle.designationsalle }}</td>
+            <td>{{ salle.capacitesalle }}</td>
+            <td>{{ salle.prives_j ? '35 DT' : '25 DT' }}</td>
+            <td>{{ salle.prives_n ? '35 DT' : '25 DT' }}</td>
+            <td class="actions">
+              <button class="action-btn view" (click)="viewSalle(salle)" title="Voir">👁️</button>
+              <button class="action-btn edit" (click)="openEditSalleModal(salle)" title="Éditer">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteSalle(salle)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredSalles.length === 0">
+            <td colspan="7" class="text-center no-results">
+              <i class="fas fa-info-circle"></i> Aucune salle trouvée
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

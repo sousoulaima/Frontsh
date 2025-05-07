@@ -23,6 +23,11 @@ export const routes: Routes = [
         data: { title: 'Dashboard' },
       },
       {
+        path: 'agent-dashboard',
+        loadComponent: () => import('./views/agent/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+        data: { title: 'AgentDashboard' },
+      },
+      {
         path: 'gestion-utilisateurs',
         component: GestionUtilisateursComponent,
         data: { title: 'Gestion des Utilisateurs' },
@@ -36,9 +41,17 @@ export const routes: Routes = [
         loadChildren: () => import('./views/abonnement/routes').then((m) => m.routes),
       },
       {
+        path: 'agent-abonnement',
+        loadChildren: () => import('./views/agent/Abonnement/routes').then((m) => m.routes),
+      },
+      {
         path: 'salle-formation',
         loadChildren: () => import('./views/salle-formation/routes').then((m) => m.routes),
       },
+
+
+      
+
       {
         path: 'caisse',
         loadChildren: () => import('./views/caisse/routes').then((m) => m.routes),

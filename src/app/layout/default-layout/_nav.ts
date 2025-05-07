@@ -68,7 +68,7 @@ export const navItems: INavData[] = [
 
   {
 
-    name: 'Salle de Formation',
+    name: 'Formation',
     url: '/salle-formation',
     iconComponent: { name: 'cil-layers' }
     , children: [

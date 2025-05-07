@@ -9,14 +9,15 @@ export interface Abonnement {
   totalremise: number;
   totalht: number;
   totalttc: number;
-  solde: boolean;
+  solde: boolean; // تأكد إن الـ API بترجع boolean، لو لا هنتعامل معاه في الكود
   restepaye: number;
-  mtpaye: number;
+  mtpaye: number; // المبلغ المالي
   datedeb: string;
   datefin: string;
   adherent_code: string;
   type_abonnement_code: string;
   categorie_abonnement_codecateg: string;
+  modalite_reg_id: string; // نوع الدفع (Espèces/Chèque)
 }
 
 export interface Adherent {
@@ -44,6 +45,7 @@ export interface TypeAbonnement {
   acceslibre: boolean;
   forfait: number;
   nbseancesemaine?: number;
+  id_categorie?: number;
 }
 
 export interface CategorieAbonnement {
@@ -56,6 +58,7 @@ export interface CategorieAbonnement {
 })
 export class AbonnementService {
   private apiUrl = 'http://localhost:8000/api/abonnements';
+  private adherentApiUrl = 'http://localhost:8000/api/adherents';
 
   constructor(protected http: HttpClient) {}
 
@@ -72,15 +75,6 @@ export class AbonnementService {
     return this.http.post<Abonnement>(`${this.apiUrl}`, abonnement);
   }
 
-  getAllAdherents(): Observable<Adherent[]> {
-    return this.http.get<Adherent[]>(`http://localhost:8000/api/adherents`);
-  }
-  getAllTypesAbonnement(): Observable<TypeAbonnement[]> {
-    return this.http.get<TypeAbonnement[]>(`http://localhost:8000/api/type-abonnements`);
-  }
-  getAllCategories(): Observable<CategorieAbonnement[]> {
-    return this.http.get<CategorieAbonnement[]>(`http://localhost:8000/api/categorie-abonnements`);
-  }
   update(id: number, data: Abonnement): Observable<Abonnement> {
     return this.http.put<Abonnement>(`${this.apiUrl}/${id}`, data);
   }
@@ -89,7 +83,25 @@ export class AbonnementService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // Méthode pour générer un code adherent aléatoire (exemple)
+  // Adherent CRUD
+  getAllAdherents(): Observable<Adherent[]> {
+    return this.http.get<Adherent[]>(this.adherentApiUrl);
+  }
+
+  createAdherent(adherent: Adherent): Observable<Adherent> {
+    return this.http.post<Adherent>(this.adherentApiUrl, adherent);
+  }
+
+  // Type Abonnement and Categories
+  getAllTypesAbonnement(): Observable<TypeAbonnement[]> {
+    return this.http.get<TypeAbonnement[]>(`http://localhost:8000/api/type-abonnements`);
+  }
+
+  getAllCategories(): Observable<CategorieAbonnement[]> {
+    return this.http.get<CategorieAbonnement[]>(`http://localhost:8000/api/categorie-abonnements`);
+  }
+
+  // Méthode pour générer un code adherent aléatoire
   generateAdherentCode(): string {
     return Math.floor(100 + Math.random() * 900).toString();
   }

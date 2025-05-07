@@ -6,7 +6,7 @@
         <h2 class="modal-title">{{ isEditing ? 'Éditer' : 'Ajouter' }} l'abonnement</h2>
         <form (ngSubmit)="saveAbonnement()" #abonnementForm="ngForm">
           <div class="form-group" *ngIf="isEditing">
-            <label>CodeAbo</label>
+            <label>Code</label>
             <input
               type="text"
               [(ngModel)]="currentAbonnement.codeabo"
@@ -18,7 +18,7 @@
           </div>
           
           <div class="form-group">
-            <label>DateAbo</label>
+            <label>Date d'Abonnement</label>
             <input
               type="date"
               [(ngModel)]="currentAbonnement.dateabo"
@@ -60,7 +60,7 @@
           </div>
           
           <div class="form-group">
-            <label>DateDeb</label>
+            <label>Date Début</label>
             <input
               type="date"
               [(ngModel)]="currentAbonnement.datedeb"
@@ -72,7 +72,7 @@
           </div>
           
           <div class="form-group">
-            <label>DateFin</label>
+            <label>Date Fin</label>
             <input
               type="date"
               [(ngModel)]="currentAbonnement.datefin"
@@ -84,7 +84,7 @@
           </div>
           
           <div class="form-group">
-            <label>TotalHTAbo (DT)</label>
+            <label>Total HT (DT)</label>
             <input
               type="number"
               [(ngModel)]="currentAbonnement.totalhtabo"
@@ -93,12 +93,12 @@
               min="0"
               step="0.01"
               class="form-input"
-              (input)="updateFinancials(currentAbonnement)"
+              (input)="updateFinancials()"
             />
           </div>
           
           <div class="form-group">
-            <label>TotalRemise (DT)</label>
+            <label>Remise (DT)</label>
             <input
               type="number"
               [(ngModel)]="currentAbonnement.totalremise"
@@ -107,12 +107,12 @@
               min="0"
               step="0.01"
               class="form-input"
-              (input)="updateFinancials(currentAbonnement)"
+              (input)="updateFinancials()"
             />
           </div>
           
           <div class="form-group">
-            <label>TotalNHT (DT)</label>
+            <label>Total HT Net (DT)</label>
             <input
               type="number"
               [(ngModel)]="currentAbonnement.totalht"
@@ -126,7 +126,7 @@
           </div>
           
           <div class="form-group">
-            <label>TotalTTC (DT)</label>
+            <label>Total TTC (DT)</label>
             <input
               type="number"
               [(ngModel)]="currentAbonnement.totalttc"
@@ -140,17 +140,21 @@
           </div>
           
           <div class="form-group">
-            <label>Solde</label>
-            <input
-              type="text"
-              value="{{ isSoldeOui(currentAbonnement.restepaye) ? 'Oui' : 'Non' }}"
-              readonly
+            <label>Solde Réglé</label>
+            <select
+              [(ngModel)]="currentAbonnement.solde"
+              name="solde"
+              required
               class="form-input"
-            />
+              (change)="updateFinancials()"
+            >
+              <option [value]="true">Oui</option>
+              <option [value]="false">Non</option>
+            </select>
           </div>
           
           <div class="form-group">
-            <label>MTPayee (DT)</label>
+            <label>Montant Payé (DT)</label>
             <input
               type="number"
               [(ngModel)]="currentAbonnement.mtpaye"
@@ -159,12 +163,12 @@
               min="0"
               step="0.01"
               class="form-input"
-              (input)="updateFinancials(currentAbonnement)"
+              (input)="updateFinancials()"
             />
           </div>
           
           <div class="form-group">
-            <label>Restepayee (DT)</label>
+            <label>Reste à Payer (DT)</label>
             <input
               type="number"
               [(ngModel)]="currentAbonnement.restepaye"
@@ -175,6 +179,21 @@
               readonly
               class="form-input"
             />
+          </div>
+          
+          <div class="form-group">
+            <label>Mode de Paiement</label>
+            <select
+              [(ngModel)]="currentAbonnement.mtpaye"
+              name="mtpaye"
+              required
+              class="form-input"
+            >
+              <option value="">Sélectionner un mode</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Carte">Carte</option>
+              <option value="Chèque">Chèque</option>
+            </select>
           </div>
           
           <div class="modal-actions">
@@ -190,19 +209,22 @@
       <div class="modal-content">
         <h2 class="modal-title">Détails de l'abonnement</h2>
         <div class="user-details">
-          <p><strong>CodeAbo :</strong> {{ viewedAbonnement?.codeabo }}</p>
-          <p><strong>DateAbo :</strong> {{ viewedAbonnement?.dateabo }}</p>
+          <p><strong>Code :</strong> {{ viewedAbonnement?.codeabo }}</p>
+          <p><strong>Date d'Abonnement :</strong> {{ viewedAbonnement?.dateabo }}</p>
           <p><strong>Adhérent :</strong> {{ viewedAbonnement?.adherentName }}</p>
           <p><strong>Type :</strong> {{ viewedAbonnement?.typeDesignation }}</p>
-          <p><strong>DateDeb :</strong> {{ viewedAbonnement?.datedeb }}</p>
-          <p><strong>DateFin :</strong> {{ viewedAbonnement?.datefin }}</p>
-          <p><strong>TotalHTAbo :</strong> {{ viewedAbonnement?.totalhtabo }} DT</p>
-          <p><strong>TotalRemise :</strong> {{ viewedAbonnement?.totalremise }} DT</p>
-          <p><strong>TotalNHT :</strong> {{ viewedAbonnement?.totalht }} DT</p>
-          <p><strong>TotalTTC :</strong> {{ viewedAbonnement?.totalttc }} DT</p>
-          <p><strong>Solde :</strong> {{ isSoldeOui(viewedAbonnement?.restepaye) ? 'Oui' : 'Non' }}</p>
-          <p><strong>MTPayee :</strong> {{ viewedAbonnement?.mtpaye }} DT</p>
-          <p><strong>Restepayee :</strong> {{ viewedAbonnement?.restepaye }} DT</p>
+          <p><strong>Date Début :</strong> {{ viewedAbonnement?.datedeb }}</p>
+          <p><strong>Date Fin :</strong> {{ viewedAbonnement?.datefin }}</p>
+          <p><strong>Total HT :</strong> {{ viewedAbonnement?.totalhtabo }} DT</p>
+          <p><strong>Remise :</strong> {{ viewedAbonnement?.totalremise }} DT</p>
+          <p><strong>Total HT Net :</strong> {{ viewedAbonnement?.totalht }} DT</p>
+          <p><strong>Total TTC :</strong> {{ viewedAbonnement?.totalttc }} DT</p>
+          <p><strong>Solde Réglé :</strong> {{ viewedAbonnement?.solde ? 'Oui' : 'Non' }}</p>
+          <p><strong>Montant Payé :</strong> {{ viewedAbonnement?.mtpaye }} DT</p>
+          <p><strong>Reste à Payer :</strong> {{ viewedAbonnement?.restepaye }} DT</p>
+          <p><strong>Mode de Paiement :</strong> 
+            <span [ngClass]="getMiPayeClass(viewedAbonnement?.mtpaye)">{{ viewedAbonnement?.mtpaye }}</span>
+          </p>
         </div>
         <div class="modal-actions">
           <button class="close-btn" (click)="closeViewModal()">Fermer</button>
@@ -225,7 +247,7 @@
     <!-- Header Section -->
     <div class="header">
       <div class="header-title">
-        <h1 class="text-blue-800">Gestion des Abonnements</h1>
+        <h1 class="text-blue-800">Agent</h1>
         <p class="text-gray-600">Liste des abonnements enregistrés ({{ filteredAbonnements.length }} abonnements)</p>
       </div>
       <!-- Removed: <button class="add-btn" (click)="openAddAbonnementModal()">Ajouter un abonnement</button> -->
@@ -255,6 +277,15 @@
               </option>
             </select>
           </label>
+          <label class="filter-label">
+            Mode de Paiement :
+            <select [(ngModel)]="filterMiPaye" (change)="filterAbonnements()" class="filter-select">
+              <option value="">Tous</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Carte">Carte</option>
+              <option value="Chèque">Chèque</option>
+            </select>
+          </label>
         </div>
       </div>
     </div>
@@ -264,33 +295,37 @@
       <table>
         <thead>
           <tr>
-            <th>CodeAbo</th>
-            <th>DateAbo</th>
-            <th>TotalHTAbo</th>
-            <th>TotalRemise</th>
-            <th>TotalNHT</th>
-            <th>TotalTTC</th>
-            <th>Solde</th>
-            <th>Restepayee</th>
-            <th>MTPayee</th>
-            <th>DateDeb</th>
-            <th>DateFin</th>
-            <th>Actions</th>
+            <th>CODE</th>
+            <th>DATE</th>
+            <th>ADHÉRENT</th>
+            <th>TYPE</th>
+            <th>DÉBUT</th>
+            <th>FIN</th>
+            <th>TOTAL TTC</th>
+            <th>PAYÉ</th>
+            <th>RESTE</th>
+            <th>MODE PAIEMENT</th>
+            <th>SOLDE</th>
+            <th>ACTIONS</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let abonnement of filteredAbonnements">
             <td>{{ abonnement.codeabo }}</td>
             <td>{{ abonnement.dateabo | date:'dd/MM/yy' }}</td>
-            <td>{{ abonnement.totalhtabo | number:'1.2-2' }} DT</td>
-            <td>{{ abonnement.totalremise | number:'1.2-2' }} DT</td>
-            <td>{{ abonnement.totalht | number:'1.2-2' }} DT</td>
-            <td>{{ abonnement.totalttc | number:'1.2-2' }} DT</td>
-            <td>{{ isSoldeOui(abonnement.restepaye) ? 'Oui' : 'Non' }}</td>
-            <td>{{ abonnement.restepaye | number:'1.2-2' }} DT</td>
-            <td>{{ abonnement.mtpaye | number:'1.2-2' }} DT</td>
+            <td>{{ abonnement.adherentName }}</td>
+            <td>{{ abonnement.typeDesignation }}</td>
             <td>{{ abonnement.datedeb | date:'dd/MM/yy' }}</td>
             <td>{{ abonnement.datefin | date:'dd/MM/yy' }}</td>
+            <td>{{ abonnement.totalttc | number:'1.2-2' }} DT</td>
+            <td>{{ abonnement.mtpaye | number:'1.2-2' }} DT</td>
+            <td>{{ abonnement.restepaye | number:'1.2-2' }} DT</td>
+            <td>
+              <span class="miPaye" [ngClass]="getMiPayeClass(abonnement.mtpaye)">
+                {{ abonnement.mtpaye }}
+              </span>
+            </td>
+            <td>{{ abonnement.solde ? 'Oui' : 'Non' }}</td>
             <td class="actions">
               <button class="action-btn view" (click)="viewAbonnement(abonnement)" title="Voir">👁️</button>
               <button class="action-btn edit" (click)="openEditAbonnementModal(abonnement)" title="Éditer">✏️</button>

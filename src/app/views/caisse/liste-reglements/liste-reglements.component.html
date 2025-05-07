@@ -1,1 +1,200 @@
-<p>liste-reglements works!</p>
+<div class="gestion-reglements-container">
+  <div class="gestion-reglements">
+    <!-- Modal for Adding/Editing a Reglement -->
+    <div class="modal" *ngIf="showModal">
+      <div class="modal-content">
+        <h2 class="modal-title">{{ isEditing ? 'Éditer le règlement' : 'Ajouter un règlement' }}</h2>
+        <form (ngSubmit)="saveReglement()" #reglementForm="ngForm">
+          <!-- Section: Informations du règlement -->
+          <div class="form-section">
+            <h3>Informations du règlement</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Date <span class="required">*</span></label>
+                <input
+                  type="date"
+                  [(ngModel)]="currentReglement.datereg"
+                  name="datereg"
+                  #datereg="ngModel"
+                  required
+                  class="form-input"
+                  [ngClass]="{'invalid': datereg.invalid && (datereg.dirty || datereg.touched)}"
+                />
+                <span class="error" *ngIf="datereg.invalid && (datereg.dirty || datereg.touched)">La date est requise.</span>
+              </div>
+              <div class="form-group">
+                <label>Montant <span class="required">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="currentReglement.mtreg"
+                  name="mtreg"
+                  #mtreg="ngModel"
+                  required
+                  pattern="^[0-9]+(\.[0-9]{1,2})?$"
+                  class="form-input"
+                  [ngClass]="{'invalid': mtreg.invalid && (mtreg.dirty || mtreg.touched)}"
+                />
+                <span class="error" *ngIf="mtreg.invalid && (mtreg.dirty || mtreg.touched)">Montant invalide (ex: 1234.56).</span>
+              </div>
+              <div class="form-group">
+                <label>Modalité de règlement <span class="required">*</span></label>
+                <select
+                  [(ngModel)]="currentReglement.modalite_reg"
+                  name="modalite_reg"
+                  #modalite_reg="ngModel"
+                  required
+                  class="form-input"
+                  [ngClass]="{'invalid': modalite_reg.invalid && (modalite_reg.dirty || modalite_reg.touched)}"
+                  (change)="onModChange()"
+                >
+                  <option value="" disabled>Sélectionner une modalité</option>
+                  <option *ngFor="let modalite of filteredModalites" [value]="modalite.codeMod">{{ modalite.designationmod }}</option>
+                </select>
+                <span class="error" *ngIf="modalite_reg.invalid && (modalite_reg.dirty || modalite_reg.touched)">La modalité est requise.</span>
+              </div>
+              <div class="form-group">
+                <label>Abonnement <span class="required">*</span></label>
+                <select
+                  [(ngModel)]="currentReglement.abonnement_codeabo"
+                  name="abonnement_codeabo"
+                  #abonnement="ngModel"
+                  required
+                  class="form-input"
+                  [ngClass]="{'invalid': abonnement.invalid && (abonnement.dirty || abonnement.touched)}"
+                >
+                  <option value="" disabled>Sélectionner un abonnement</option>
+                  <option *ngFor="let abo of abonnements" [value]="abo.codeabo">{{ abo.codeabo }} {{ abo.dateabo }}</option>
+                </select>
+                <span class="error" *ngIf="abonnement.invalid && (abonnement.dirty || abonnement.touched)">L'abonnement est requis.</span>
+              </div>
+              <div class="form-group" *ngIf="verif_mod">
+                <label>Numéro Chèque</label>
+                <input
+                  type="text"
+                  [(ngModel)]="currentReglement.numchq"
+                  name="numchq"
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group" *ngIf="verif_mod">
+                <label>Numéro Traite</label>
+                <input
+                  type="text"
+                  [(ngModel)]="currentReglement.numtraite"
+                  name="numtraite"
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group full-width">
+                <label>Commentaire</label>
+                <textarea
+                  [(ngModel)]="currentReglement.commentaire"
+                  name="commentaire"
+                  class="form-input"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
+            <button type="submit" class="save-btn" [disabled]="!reglementForm.valid">Sauvegarder</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing a Reglement -->
+    <div class="modal" *ngIf="showViewModal">
+      <div class="modal-content">
+        <h2 class="modal-title">Détails du règlement</h2>
+        <div class="user-details">
+          <p><strong>Code :</strong> {{ viewedReglement?.codereg }}</p>
+          <p><strong>Date :</strong> {{ viewedReglement?.datereg | date:'yyyy-MM-dd' }}</p>
+          <p><strong>Montant :</strong> {{ viewedReglement?.mtreg }}</p>
+          <p><strong>Numéro Chèque :</strong> {{ viewedReglement?.numchq || '-' }}</p>
+          <p><strong>Numéro Traite :</strong> {{ viewedReglement?.numtraite || '-' }}</p>
+          <p><strong>Commentaire :</strong> {{ viewedReglement?.commentaire || '-' }}</p>
+          <p><strong>Modalité :</strong> {{ getModaliteName(viewedReglement?.modalite_reg) }}</p>
+          <p><strong>Abonnement :</strong> {{ getAbonnementName(viewedReglement?.abonnement_codeabo) }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm">
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmer la suppression</h2>
+        <p class="modal-text">Êtes-vous sûr de vouloir supprimer le règlement {{ reglementToDelete?.codereg }} ?</p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
+          <button class="delete-btn" (click)="deleteReglement()">Supprimer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-title">
+        <h1 class="text-blue-800">Gestion des Règlements</h1>
+        <p class="text-gray-600">Liste des règlements enregistrés ({{ filteredReglements.length }} règlements)</p>
+      </div>
+      <div class="actions">
+        <button class="add-btn" (click)="openAddReglementModal()">+ Ajouter un règlement</button>
+      </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-filter">
+      <div class="search">
+        <input
+          type="text"
+          placeholder="Rechercher un règlement..."
+          [(ngModel)]="searchQuery"
+          (input)="filterReglements()"
+          class="search-input"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+    </div>
+
+    <!-- Reglements Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>CODE</th>
+            <th>DATE</th>
+            <th>MONTANT</th>
+            <th>NUM. CHÈQUE</th>
+            <th>NUM. TRAITE</th>
+            <th>COMMENTAIRE</th>
+            <th>MODALITÉ</th>
+            <th>ABONNEMENT</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reglement of filteredReglements; let i = index">
+            <td>{{ reglement.codereg }}</td>
+            <td>{{ reglement.datereg | date:'yyyy-MM-dd' }}</td>
+            <td>{{ reglement.mtreg }}</td>
+            <td>{{ reglement.numchq || '-' }}</td>
+            <td>{{ reglement.numtraite || '-' }}</td>
+            <td>{{ reglement.commentaire || '-' }}</td>
+            <td>{{ getModaliteName(reglement.modalite_reg) }}</td>
+            <td>{{ getAbonnementName(reglement.abonnement_codeabo) }}</td>
+            <td class="actions">
+              <button class="action-btn view" (click)="viewReglement(reglement)" title="Voir">👁️</button>
+              <button class="action-btn edit" (click)="openEditReglementModal(reglement)" title="Éditer">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteReglement(reglement)" title="Supprimer">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

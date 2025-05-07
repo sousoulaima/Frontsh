@@ -15,6 +15,7 @@ import {
 } from '@coreui/angular';
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems } from './_nav';
+import { navAgentItems } from './_nav_agent';
 import { AuthService } from '../../services/auth.service';
 
 function isOverflown(element: HTMLElement): boolean {
@@ -45,9 +46,16 @@ function isOverflown(element: HTMLElement): boolean {
   ],
 })
 export class DefaultLayoutComponent {
+ 
+ 
   public navItems = [...navItems];
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {
+    const role = localStorage.getItem('role') as string;
+    if (role === 'Agent Accueil') {
+      this.navItems = [...navAgentItems];
+    }
+  }
 
   logout(): void {
     this.authService.logout();
