@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SalleFormation, SalleFormationService } from '../../../services/salle-formation.service';
+import { SalleFormation, SalleFormationService } from '../../../../services/salle-formation.service';
 
 interface PrixOption {
   value: number;

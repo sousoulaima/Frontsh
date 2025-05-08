@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
-import { Formateur, FormateurService } from '../../../services/formateur.service';
+import { Formateur, FormateurService } from '../../../../services/formateur.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 // Assurez-vous d'importer correctement l'interface

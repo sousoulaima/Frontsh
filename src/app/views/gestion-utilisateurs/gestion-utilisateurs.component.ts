@@ -205,7 +205,7 @@ export class GestionUtilisateursComponent implements OnInit {
         return 'role-admin';
       case 'Adhérent':
         return 'role-adherent';
-      case 'Agent d\'accueil':
+      case 'Agent Accueil':
         return 'role-agent';
       case 'Formateur':
         return 'role-trainer';

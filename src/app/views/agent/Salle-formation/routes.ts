@@ -12,14 +12,14 @@ export const routes: Routes = [
     path: 'formateur',
     loadComponent: () => import('./formateur/formateur.component').then(m => m.FormateurComponent),
     data: {
-      title: 'Categorie Abonnement'
+      title: 'Formateur'
     }
   },
   {
     path: 'reservation',
     loadComponent: () => import('./reservation/reservation.component').then(m => m.ReservationComponent),
     data: {
-      title: 'Type Abonnement'
+      title: 'Reservation'
     }
   }
 ];

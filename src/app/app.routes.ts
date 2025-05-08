@@ -49,7 +49,10 @@ export const routes: Routes = [
         loadChildren: () => import('./views/salle-formation/routes').then((m) => m.routes),
       },
 
-
+      {
+        path: 'agent-salle-formation',
+        loadChildren: () => import('./views/agent/salle-formation/routes').then((m) => m.routes),
+      },
       
 
       {

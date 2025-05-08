@@ -9,15 +9,15 @@ export interface Abonnement {
   totalremise: number;
   totalht: number;
   totalttc: number;
-  solde: boolean; // تأكد إن الـ API بترجع boolean، لو لا هنتعامل معاه في الكود
+  solde: boolean; 
   restepaye: number;
-  mtpaye: number; // المبلغ المالي
+  mtpaye: number; 
   datedeb: string;
   datefin: string;
   adherent_code: string;
   type_abonnement_code: string;
   categorie_abonnement_codecateg: string;
-  modalite_reg_id: string; // نوع الدفع (Espèces/Chèque)
+  modalite_reg_id: string; 
 }
 
 export interface Adherent {

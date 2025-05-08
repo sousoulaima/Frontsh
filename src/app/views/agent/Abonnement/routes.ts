@@ -19,7 +19,7 @@ export const routes: Routes = [
     path: 'ajoutAbonnement',
     loadComponent: () => import('./ajout-abonnement/ajout-abonnement.component').then(m => m.AjoutAbonnementComponent),
     data: {
-      title: 'Ajouter Abonnemenet'
+      title: 'Ajout Abonnemenet'
     }
   }
 ];

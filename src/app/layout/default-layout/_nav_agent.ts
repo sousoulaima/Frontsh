@@ -15,7 +15,7 @@ export const navAgentItems: INavData[] = [
     children: [
       {
         name: 'Adhérents',
-        url: '/agent-abonnemen/adherent',
+        url: '/agent-abonnement/adherent',
         iconComponent: { name: 'cil-user' },
         class: 'nav-item-adherents', // Classe personnalisée
       },
@@ -26,11 +26,39 @@ export const navAgentItems: INavData[] = [
         class: 'nav-item-liste-abonnement', // Classe personnalisée
       },
       {
-        name: 'Ajouter Abonnement',
-        url: '/agent-abonnemen/ajoutAbonnement',
+        name: 'Ajout Abonnement',
+        url: '/agent-abonnement/ajoutAbonnement',
         iconComponent: { name: 'cil-pencil' },
         class: 'nav-item-ajout-abonnement', // Classe personnalisée
       }
     ]
   },
-];
+      {
+
+        name: 'Salle-formation',
+        url: '/agent-salle-formation',
+        iconComponent: { name: 'cil-layers' }
+        , children: [
+          {
+            name: 'Liste des Salles ',
+            url: '/agent-salle-formation/listedesSalle',
+            iconComponent: { name: 'cil-list' }
+          },
+          {
+            name: 'Formateur',
+            url: '/agent-salle-formation/formateur',
+           iconComponent: { name:'cil-user'}
+          },
+          {
+            name: 'Réservation',
+            url: '/agent-salle-formation/reservation',
+            iconComponent: { name:'cil-calendar'}
+          }]  },
+
+
+        ];
+
+
+
+    
+
