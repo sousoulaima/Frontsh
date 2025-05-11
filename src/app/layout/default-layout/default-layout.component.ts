@@ -46,8 +46,6 @@ function isOverflown(element: HTMLElement): boolean {
   ],
 })
 export class DefaultLayoutComponent {
- 
- 
   public navItems = [...navItems];
 
   constructor(private authService: AuthService) {

@@ -1,301 +1,481 @@
-import { DOCUMENT, CommonModule, NgIf } from '@angular/common';
-import { AfterViewInit, Component, DestroyRef, ElementRef, ViewChild, effect, inject, OnInit, signal, WritableSignal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Chart, ChartOptions, registerables } from 'chart.js';
-import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import Chart from 'chart.js/auto';
+import { DashboardService } from '../../../services/dashboard.service';
 
-// Register all Chart.js elements
-Chart.register(...registerables);
-
-interface ISpace {
-  name: string;
-  type: string;
-  status: string;
-  revenue: number;
+interface Abonnement {
+  id: number;
+  CodeAbo: number;
+  DateAbo: string;
+  TotalHTAbo: string;
+  TotalRemise: string;
+  TotalNHT: string;
+  TotalTTC: string;
+  Solde: string;
+  RestePaye: string;
+  MTPaye: string;
+  DateDeb: string;
+  DateFin: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-interface IClient {
-  name: string;
-  email: string;
-  avatarColor: string;
-  initials: string;
-  hasCustomIcon?: boolean;
+interface Adherent {
+  id: number;
+  Code: number;
+  Nom: string;
+  Prenom: string;
+  Profession: string;
+  Email: string;
+  Adresse: string;
+  Telephone1: string;
+  Telephone2: string;
+  DateNaissance: string;
+  CIN: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Salle {
+  id: number;
+  Code: number;
+  Designation: string;
+  Capacite: number;
+  PrixJour: string;
+  PrixHeure: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Formateur {
+  id: number;
+  Code: number;
+  Nom: string;
+  Prenom: string;
+  Email: string;
+  Telephone: string;
+  Adresse: string;
+  CreeLe: string;
+  MisAJourLe: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Reservation {
+  id: number;
+  ID: number;
+  DateReservation: string;
+  Salle: string;
+  Formateur: string;
+  Montant: string;
+  CreeLe: string;
+  MisAJourLe: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, NgIf],
+  imports: [CommonModule, DatePipe],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
+  providers: [DatePipe, DashboardService]
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
-  readonly #destroyRef: DestroyRef = inject(DestroyRef);
-  readonly #document: Document = inject(DOCUMENT);
-  readonly #chartsData: DashboardChartsData = inject(DashboardChartsData);
+export class DashboardComponent implements AfterViewInit {
+  @ViewChild('abonnementsChart') abonnementsChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('reservationsChart') reservationsChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('abonnementsTtcChart') abonnementsTtcChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('adherentsProfessionChart') adherentsProfessionChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('reservationsPerSalleChart') reservationsPerSalleChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('formateursCreationChart') formateursCreationChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('revenueTrendsChart') revenueTrendsChartRef!: ElementRef<HTMLCanvasElement>;
 
-  // Reference to the Chart.js canvas
-  @ViewChild('visitorChart') visitorChart!: ElementRef<HTMLCanvasElement>;
+  abonnements: Abonnement[] = [];
+  adherents: Adherent[] = [];
+  salles: Salle[] = [];
+  formateurs: Formateur[] = [];
+  reservations: Reservation[] = [];
 
-  // Total revenue
-  public totalRevenue: number = 8249210;
+  totalStats: any = {};
+  reservationsStats: any = {};
+  dateRanges: any = {};
+  sallesStatus: any = {};
+  occupancyRate: number = 0;
+  dailyReservations: any[] = [];
+  professions: any[] = [];
+  averageCapacity: number = 0;
+  formateursByCreation: any[] = [];
+  abonnementsTTC: any[] = [];
+  reservationsPerSalle: any[] = [];
 
-  // Space metrics
-  public coworkingOccupancy: number = 37;
-  public coworkingTotal: number = 40;
-  public sharedSpaceOccupancy: number = 32;
-  public sharedSpaceTotal: number = 38;
-  public virtualOfficeOccupancy: number = 120;
-  public virtualOfficeTotal: number = 120;
-  public privateOfficeOccupancy: number = 6;
-  public privateOfficeTotal: number = 18;
+  private abonnementsChart!: Chart;
+  private reservationsChart!: Chart;
+  private abonnementsTtcChart!: Chart;
+  private adherentsProfessionChart!: Chart;
+  private reservationsPerSalleChart!: Chart;
+  private formateursCreationChart!: Chart;
+  private revenueTrendsChart!: Chart;
 
-  // Selected period for visitor statistics
-  public selectedPeriod: string = '1S';
+  constructor(private dashboardService: DashboardService, private datePipe: DatePipe) {}
 
-  // Visitor chart data for different periods
-  public visitorChartDataMap: { [key: string]: any } = {
-    '1J': {
-      labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
-      datasets: [
-        {
-          label: "Aujourd'hui",
-          data: [50, 80, 120, 200, 150, 100],
-          borderColor: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#9CA3AF',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#9CA3AF',
-        },
-        {
-          label: 'Hier',
-          data: [60, 90, 110, 180, 140, 90],
-          borderColor: '#1E3A8A',
-          backgroundColor: 'rgba(30, 58, 138, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#1E3A8A',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#1E3A8A',
-        },
-      ],
-    },
-    '1S': {
-      labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-      datasets: [
-        {
-          label: 'Cette semaine',
-          data: [80, 200, 400, 300, 600, 100, 50],
-          borderColor: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#9CA3AF',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#9CA3AF',
-        },
-        {
-          label: 'Semaine dernière',
-          data: [90, 150, 300, 350, 500, 120, 80],
-          borderColor: '#1E3A8A',
-          backgroundColor: 'rgba(30, 58, 138, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#1E3A8A',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#1E3A8A',
-        },
-      ],
-    },
-    '1M': {
-      labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-      datasets: [
-        {
-          label: 'Ce mois',
-          data: [1200, 1800, 1500, 2000],
-          borderColor: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#9CA3AF',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#9CA3AF',
-        },
-        {
-          label: 'Mois dernier',
-          data: [1000, 1600, 1400, 1800],
-          borderColor: '#1E3A8A',
-          backgroundColor: 'rgba(30, 58, 138, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#1E3A8A',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#1E3A8A',
-        },
-      ],
-    },
-    '1A': {
-      labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-      datasets: [
-        {
-          label: 'Cette année',
-          data: [5000, 6000, 5500, 7000, 6500, 8000, 7500, 7200, 6800, 7100, 6900, 7300],
-          borderColor: '#9CA3AF',
-          backgroundColor: 'rgba(156, 163, 175, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#9CA3AF',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#9CA3AF',
-        },
-        {
-          label: 'Année dernière',
-          data: [4800, 5800, 5300, 6700, 6200, 7800, 7300, 7000, 6600, 6900, 6700, 7100],
-          borderColor: '#1E3A8A',
-          backgroundColor: 'rgba(30, 58, 138, 0.2)',
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#1E3A8A',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#1E3A8A',
-        },
-      ],
-    },
-  };
-
-  public visitorChartOptions: ChartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top', labels: { font: { size: 12 }, color: '#1E3A8A' } },
-      tooltip: { backgroundColor: '#1E3A8A', titleColor: '#fff', bodyColor: '#fff' },
-    },
-    scales: {
-      x: { ticks: { color: '#1E3A8A' } },
-      y: { beginAtZero: true, ticks: { color: '#1E3A8A', stepSize: 200 } },
-    },
-    animation: {
-      duration: 2000,
-      easing: 'easeOutQuart',
-    },
-  };
-
-  // Chart instance
-  private chartInstance: Chart | null = null;
-
-  // Spaces (activities)
-  public spaces: ISpace[] = [
-    { name: 'Espace Impla', type: 'Bureau privé', status: 'Occupé', revenue: 28000 },
-    { name: 'Espace Ter-ter', type: 'Bureau virtuel', status: 'Disponible', revenue: 11080 },
-    { name: 'Espace Skyulah', type: 'Coworking', status: 'Occupé', revenue: 12090 },
-  ];
-
-  // Clients with custom icon for Iman Thao
-  public clients: IClient[] = [
-    { name: 'Iman Thao', email: 'iman.thao@example.com', avatarColor: 'bg-teal-500', initials: 'IT', hasCustomIcon: true },
-    { name: 'Dina Saoudi', email: 'dina.saoudi@example.com', avatarColor: 'bg-yellow-500', initials: 'DS' },
-    { name: 'Nadia Chemsi', email: 'nadia.chemsi@example.com', avatarColor: 'bg-purple-500', initials: 'NC' },
-  ];
-
-  // User profile
-  public user = {
-    name: 'soulaima',
-    role: 'Admin S.H_Coworking',
-    initials: 'SH',
-    avatarColor: 'bg-indigo-500',
-  };
-
-  // Chart signals
-  public occupancyChart: IChartProps = { type: 'line' };
-  public occupancyChartRef: WritableSignal<any> = signal(undefined);
-
-  #occupancyChartRefEffect = effect(() => {
-    if (this.occupancyChartRef()) {
-      this.setChartStyles();
-    }
-  });
-
-  public trafficRadioGroup = new FormGroup({
-    trafficRadio: new FormControl('Week'),
-  });
-
-  ngOnInit(): void {
-    this.initCharts();
-    this.updateChartOnColorModeChange();
+  ngAfterViewInit() {
+    this.loadStats();
   }
 
-  ngAfterViewInit(): void {
-    this.updateVisitorChart();
-  }
+  loadStats() {
+    this.dashboardService.getStats().subscribe({
+      next: (res) => {
+        this.totalStats = res.total_stats;
+        this.reservationsStats = res.reservations;
+        this.dateRanges = res.date_ranges;
+        this.sallesStatus = res.salles_status_today;
+        this.occupancyRate = res.occupancy_rate;
+        this.dailyReservations = res.daily_reservations;
+        this.professions = res.professions;
+        this.averageCapacity = res.average_capacity;
+        this.formateursByCreation = res.formateurs_by_creation;
+        this.abonnementsTTC = res.abonnements_ttc;
 
-  initCharts(): void {
-    this.occupancyChart = this.#chartsData.mainChart;
-  }
+        this.abonnements = res.all_data.abonnements || [];
+        this.adherents = res.all_data.adherents || [];
+        this.salles = res.all_data.salles || [];
+        this.formateurs = res.all_data.formateurs || [];
+        this.reservations = res.all_data.reservations || [];
 
-  setVisitorPeriod(period: string): void {
-    this.selectedPeriod = period;
-    this.updateVisitorChart();
-  }
-
-  updateVisitorChart(): void {
-    if (this.visitorChart) {
-      const ctx = this.visitorChart.nativeElement.getContext('2d');
-      if (ctx) {
-        // Destroy previous chart instance if it exists
-        if (this.chartInstance) {
-          this.chartInstance.destroy();
-        }
-        // Create new chart instance
-        this.chartInstance = new Chart(ctx, {
-          type: 'line',
-          data: this.visitorChartDataMap[this.selectedPeriod],
-          options: this.visitorChartOptions,
+        // Calculate reservations per salle
+        this.reservationsPerSalle = this.salles.map(salle => {
+          const count = this.reservations.filter(res => res.Salle === salle.Designation).length;
+          return { salle: salle.Designation, total: count };
         });
-      }
-    }
-  }
 
-  setTrafficPeriod(value: string): void {
-    this.trafficRadioGroup.setValue({ trafficRadio: value });
-    this.#chartsData.initMainChart(value);
-    this.initCharts();
-  }
-
-  handleChartRef($chartRef: any) {
-    if ($chartRef) {
-      this.occupancyChartRef.set($chartRef);
-    }
-  }
-
-  updateChartOnColorModeChange() {
-    const handler = () => {
-      this.setChartStyles();
-    };
-
-    this.#document.addEventListener('ColorSchemeChange', handler);
-
-    this.#destroyRef.onDestroy(() => {
-      this.#document.removeEventListener('ColorSchemeChange', handler);
+        this.createCharts();
+      },
+      error: (err) => console.error('Erreur lors de la récupération des données:', err)
     });
   }
 
-  setChartStyles() {
-    if (this.occupancyChartRef()) {
-      setTimeout(() => {
-        const options: ChartOptions = { ...this.occupancyChart.options };
-        const scales = this.#chartsData.getScales();
-        this.occupancyChartRef().options.scales = { ...options.scales, ...scales };
-        this.occupancyChartRef().update();
+  createCharts() {
+    this.createAbonnementsChart();
+    this.createReservationsChart();
+    this.createAbonnementsTtcChart();
+    this.createAdherentsProfessionChart();
+    this.createReservationsPerSalleChart();
+    this.createFormateursCreationChart();
+    this.createRevenueTrendsChart();
+  }
+
+  calculateTotalTTC(abonnements: Abonnement[]): number {
+    return abonnements.reduce((sum, abo) => {
+      const ttc = parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', ''));
+      return sum + (isNaN(ttc) ? 0 : ttc);
+    }, 0);
+  }
+
+  calculateAverageAge(adherents: Adherent[]): number {
+    const currentYear = new Date().getFullYear();
+    const validAges = adherents
+      .map(adherent => {
+        const birthYear = new Date(adherent.DateNaissance).getFullYear();
+        return birthYear > 0 && birthYear <= currentYear ? currentYear - birthYear : null;
+      })
+      .filter(age => age !== null) as number[];
+    return validAges.length > 0 ? Math.round(validAges.reduce((sum, age) => sum + age, 0) / validAges.length) : 0;
+  }
+
+  calculateTotalMontant(reservations: Reservation[]): number {
+    return reservations.reduce((sum, res) => {
+      const montant = parseFloat(res.Montant.replace(' DT', '').replace(',', ''));
+      return sum + (isNaN(montant) ? 0 : montant);
+    }, 0);
+  }
+
+  createAbonnementsChart() {
+    const ctx = this.abonnementsChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.abonnementsChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Online', 'Offline'],
+          datasets: [{
+            data: [this.abonnements.length, Math.max(10 - this.abonnements.length, 0)],
+            backgroundColor: ['#3b82f6', '#dbeafe'],
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#4b5563' } },
+          },
+        }
       });
+    }
+  }
+
+  toggleAbonnementsChart(mode: 'online' | 'offline') {
+    if (this.abonnementsChart) {
+      this.abonnementsChart.data.datasets[0].data = mode === 'online' 
+        ? [this.abonnements.length, Math.max(10 - this.abonnements.length, 0)]
+        : [Math.max(10 - this.abonnements.length, 0), this.abonnements.length];
+      this.abonnementsChart.update();
+    }
+  }
+
+  createReservationsChart() {
+    const ctx = this.reservationsChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.reservationsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: this.dailyReservations.map(res => this.datePipe.transform(res.day, 'dd/MM/yyyy')),
+          datasets: [{
+            label: 'Réservations',
+            data: this.dailyReservations.map(res => res.total),
+            backgroundColor: '#2dd4bf',
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true,
+          indexAxis: 'y',
+          scales: {
+            x: { beginAtZero: true, ticks: { color: '#4b5563' } },
+            y: { ticks: { color: '#4b5563' } }
+          },
+          plugins: { legend: { display: false } },
+        }
+      });
+    }
+  }
+
+  toggleReservationsChart(mode: 'online' | 'offline') {
+    if (this.reservationsChart) {
+      this.reservationsChart.data.datasets[0].data = mode === 'online'
+        ? this.dailyReservations.map(res => res.total)
+        : this.dailyReservations.map(res => res.total * 0.8);
+      this.reservationsChart.update();
+    }
+  }
+
+  createAbonnementsTtcChart() {
+    const ctx = this.abonnementsTtcChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.abonnementsTtcChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: this.abonnementsTTC.map(abo => `Abo ${abo.CodeAbo}`),
+          datasets: [
+            {
+              label: 'Total TTC (DT)',
+              data: this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', ''))),
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true,
+              tension: 0.4,
+            },
+            {
+              label: 'Previous Period',
+              data: this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.8),
+              borderColor: '#9ca3af',
+              backgroundColor: 'rgba(156, 163, 175, 0.1)',
+              fill: true,
+              tension: 0.4,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#4b5563' } },
+            x: { ticks: { color: '#4b5563' } }
+          },
+          plugins: { legend: { position: 'top', labels: { color: '#4b5563' } } },
+        }
+      });
+    }
+  }
+
+  toggleAbonnementsTtcChart(mode: 'online' | 'offline') {
+    if (this.abonnementsTtcChart) {
+      this.abonnementsTtcChart.data.datasets[0].data = mode === 'online'
+        ? this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')))
+        : this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.9);
+      this.abonnementsTtcChart.data.datasets[1].data = mode === 'online'
+        ? this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.8)
+        : this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.7);
+      this.abonnementsTtcChart.update();
+    }
+  }
+
+  createAdherentsProfessionChart() {
+    const ctx = this.adherentsProfessionChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.adherentsProfessionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: this.professions.map(prof => prof.Profession),
+          datasets: [
+            {
+              label: 'Online',
+              data: this.professions.map(prof => prof.total),
+              backgroundColor: '#3b82f6',
+            },
+            {
+              label: 'Offline',
+              data: this.professions.map(prof => prof.total * 0.7),
+              backgroundColor: '#d1d5db',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#4b5563' } },
+            x: { ticks: { color: '#4b5563' } }
+          },
+          plugins: { legend: { position: 'top', labels: { color: '#4b5563' } } },
+        }
+      });
+    }
+  }
+
+  toggleAdherentsProfessionChart(mode: 'online' | 'offline') {
+    if (this.adherentsProfessionChart) {
+      this.adherentsProfessionChart.data.datasets[0].data = mode === 'online'
+        ? this.professions.map(prof => prof.total)
+        : this.professions.map(prof => prof.total * 0.9);
+      this.adherentsProfessionChart.data.datasets[1].data = mode === 'online'
+        ? this.professions.map(prof => prof.total * 0.7)
+        : this.professions.map(prof => prof.total * 0.6);
+      this.adherentsProfessionChart.update();
+    }
+  }
+
+  createReservationsPerSalleChart() {
+    const ctx = this.reservationsPerSalleChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.reservationsPerSalleChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: this.reservationsPerSalle.map(item => item.salle),
+          datasets: [
+            {
+              label: 'Réservations',
+              data: this.reservationsPerSalle.map(item => item.total),
+              backgroundColor: 'rgba(45, 212, 191, 0.2)',
+              borderColor: '#2dd4bf',
+              borderWidth: 2,
+              pointBackgroundColor: '#2dd4bf',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              beginAtZero: true,
+              ticks: { color: '#4b5563' },
+              grid: { color: '#e5e7eb' },
+              angleLines: { color: '#e5e7eb' },
+              pointLabels: { color: '#4b5563' }
+            }
+          },
+          plugins: { legend: { position: 'top', labels: { color: '#4b5563' } } },
+        }
+      });
+    }
+  }
+
+  toggleReservationsPerSalleChart(mode: 'online' | 'offline') {
+    if (this.reservationsPerSalleChart) {
+      this.reservationsPerSalleChart.data.datasets[0].data = mode === 'online'
+        ? this.reservationsPerSalle.map(item => item.total)
+        : this.reservationsPerSalle.map(item => item.total * 0.8);
+      this.reservationsPerSalleChart.update();
+    }
+  }
+
+  createFormateursCreationChart() {
+    const ctx = this.formateursCreationChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.formateursCreationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: this.formateursByCreation.map(form => this.datePipe.transform(form.day, 'dd/MM/yyyy')),
+          datasets: [
+            {
+              label: 'Formateurs',
+              data: this.formateursByCreation.map(form => form.total),
+              backgroundColor: '#3b82f6',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#4b5563' } },
+            x: { ticks: { color: '#4b5563' } }
+          },
+          plugins: { legend: { display: false } },
+        }
+      });
+    }
+  }
+
+  toggleFormateursCreationChart(mode: 'online' | 'offline') {
+    if (this.formateursCreationChart) {
+      this.formateursCreationChart.data.datasets[0].data = mode === 'online'
+        ? this.formateursByCreation.map(form => form.total)
+        : this.formateursByCreation.map(form => form.total * 0.8);
+      this.formateursCreationChart.update();
+    }
+  }
+
+  createRevenueTrendsChart() {
+    const ctx = this.revenueTrendsChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.revenueTrendsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: this.abonnementsTTC.map(abo => this.datePipe.transform(abo.DateAbo, 'dd/MM/yyyy') || `Abo ${abo.CodeAbo}`),
+          datasets: [
+            {
+              label: 'Revenue Online',
+              data: this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', ''))),
+              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+              stack: 'combined',
+            },
+            {
+              label: 'Revenue Offline',
+              data: this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.3),
+              backgroundColor: 'rgba(156, 163, 175, 0.8)',
+              stack: 'combined',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#4b5563' }, stacked: true },
+            x: { ticks: { color: '#4b5563' } }
+          },
+          plugins: { legend: { position: 'top', labels: { color: '#4b5563' } } },
+        }
+      });
+    }
+  }
+
+  toggleRevenueTrendsChart(mode: 'online' | 'offline') {
+    if (this.revenueTrendsChart) {
+      this.revenueTrendsChart.data.datasets[0].data = mode === 'online'
+        ? this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')))
+        : this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.9);
+      this.revenueTrendsChart.data.datasets[1].data = mode === 'online'
+        ? this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.3)
+        : this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.2);
+      this.revenueTrendsChart.update();
     }
   }
 }
