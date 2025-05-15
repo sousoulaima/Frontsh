@@ -2,15 +2,33 @@ import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { Formateur, FormateurService } from '../../../services/formateur.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-// Assurez-vous d'importer correctement l'interface
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-formateur',
+  standalone: true,
   templateUrl: './formateur.component.html',
   styleUrls: ['./formateur.component.scss'],
-  imports: [CommonModule, FormsModule], // Add these imports
+  imports: [CommonModule, FormsModule],
   animations: [
-    // (Les animations restent inchangées)
+    trigger('modalAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.8)' })),
+      ]),
+    ]),
+    trigger('filterAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
+      ]),
+    ]),
   ],
 })
 export class FormateurComponent implements OnInit {
@@ -30,7 +48,7 @@ export class FormateurComponent implements OnInit {
   constructor(private formateurService: FormateurService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.loadFormateurs(); // Charger les formateurs au démarrage du composant
+    this.loadFormateurs();
   }
 
   resetFormateur(): Partial<Formateur> {
@@ -45,11 +63,13 @@ export class FormateurComponent implements OnInit {
   }
 
   loadFormateurs(): void {
-    this.formateurService.getAll().subscribe((formateurs) => {
-      this.formateurs = formateurs;
-      console.log('Formateurs:', this.formateurs); // Debugging line
-      this.filteredFormateurs = [...this.formateurs];
-      this.cdr.detectChanges();
+    this.formateurService.getAll().subscribe({
+      next: (formateurs) => {
+        this.formateurs = formateurs;
+        this.filteredFormateurs = [...formateurs];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading formateurs:', err),
     });
   }
 
@@ -57,12 +77,12 @@ export class FormateurComponent implements OnInit {
     this.filteredFormateurs = this.formateurs.filter((formateur) => {
       const query = this.searchQuery.toLowerCase();
       return (
-        formateur.codefor?.toString().toLowerCase().includes(query) ||
-        formateur.nomfor.toLowerCase().includes(query) ||
-        formateur.prenomfor.toLowerCase().includes(query) ||
-        formateur.emailfor?.toLowerCase().includes(query) ||
-        formateur.telfor?.includes(query) ||
-        formateur.adrfor?.toLowerCase().includes(query)
+        (formateur.codefor?.toString().toLowerCase() || '').includes(query) ||
+        (formateur.nomfor?.toLowerCase() || '').includes(query) ||
+        (formateur.prenomfor?.toLowerCase() || '').includes(query) ||
+        (formateur.emailfor?.toLowerCase() || '').includes(query) ||
+        (formateur.telfor || '').includes(query) ||
+        (formateur.adrfor?.toLowerCase() || '').includes(query)
       );
     });
     this.cdr.detectChanges();
@@ -95,19 +115,65 @@ export class FormateurComponent implements OnInit {
   }
 
   saveFormateur(): void {
-    const now = new Date().toISOString().replace('T', ' ').split('.')[0];
+    // Validate that nomfor and prenomfor do not contain digits
+    const hasDigitsInNom = /\d/.test(this.currentFormateur.nomfor || '');
+    const hasDigitsInPrenom = /\d/.test(this.currentFormateur.prenomfor || '');
+
+    if (hasDigitsInNom) {
+      alert('Le nom ne doit pas contenir de chiffres.');
+      return;
+    }
+
+    if (hasDigitsInPrenom) {
+      alert('Le prénom ne doit pas contenir de chiffres.');
+      return;
+    }
+
+    // Validate email and phone number uniqueness
+    const emailExists = this.formateurs.some(
+      (f) =>
+        f.emailfor === this.currentFormateur.emailfor &&
+        (!this.isEditing || f.codefor !== this.currentFormateur.codefor)
+    );
+    const phoneExists = this.formateurs.some(
+      (f) =>
+        f.telfor === this.currentFormateur.telfor &&
+        (!this.isEditing || f.codefor !== this.currentFormateur.codefor)
+    );
+
+    if (emailExists) {
+      alert('Cet email est déjà utilisé par un autre formateur.');
+      return;
+    }
+
+    if (phoneExists) {
+      alert('Ce numéro de téléphone est déjà utilisé par un autre formateur.');
+      return;
+    }
+
     if (this.isEditing) {
       if (this.currentFormateur.codefor) {
-        this.formateurService.update(this.currentFormateur.codefor, this.currentFormateur as Formateur).subscribe(() => {
-          this.loadFormateurs();
-          this.closeModal();
+        this.formateurService.update(this.currentFormateur.codefor, this.currentFormateur as Formateur).subscribe({
+          next: () => {
+            this.loadFormateurs();
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Error updating formateur:', err);
+            alert('Erreur lors de la mise à jour du formateur.');
+          },
         });
       }
     } else {
-      const newFormateur = { ...this.currentFormateur, created_at: now, updated_at: now } as Formateur;
-      this.formateurService.create(newFormateur).subscribe(() => {
-        this.loadFormateurs();
-        this.closeModal();
+      this.formateurService.create(this.currentFormateur as Formateur).subscribe({
+        next: () => {
+          this.loadFormateurs();
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error creating formateur:', err);
+          alert('Erreur lors de la création du formateur.');
+        },
       });
     }
   }
@@ -132,9 +198,15 @@ export class FormateurComponent implements OnInit {
 
   deleteFormateur(): void {
     if (this.formateurToDelete && this.formateurToDelete.codefor) {
-      this.formateurService.delete(this.formateurToDelete.codefor).subscribe(() => {
-        this.loadFormateurs();
-        this.cancelDelete();
+      this.formateurService.delete(this.formateurToDelete.codefor).subscribe({
+        next: () => {
+          this.loadFormateurs();
+          this.cancelDelete();
+        },
+        error: (err) => {
+          console.error('Error deleting formateur:', err);
+          alert('Erreur lors de la suppression du formateur.');
+        },
       });
     }
   }

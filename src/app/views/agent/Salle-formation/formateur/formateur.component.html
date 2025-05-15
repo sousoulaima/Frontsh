@@ -31,10 +31,13 @@
                   name="nomfor"
                   #nomfor="ngModel"
                   required
+                  pattern="[A-Za-zÀ-ÿ\s-]+"
                   class="form-input"
                   [ngClass]="{'invalid': nomfor.invalid && (nomfor.dirty || nomfor.touched)}"
                 />
-                <span class="error" *ngIf="nomfor.invalid && (nomfor.dirty || nomfor.touched)">Le nom est requis.</span>
+                <span class="error" *ngIf="nomfor.invalid && (nomfor.dirty || nomfor.touched)">
+                  {{ nomfor.errors?.['required'] ? 'Le nom est requis.' : 'Le nom ne doit contenir que des lettres, espaces ou tirets.' }}
+                </span>
               </div>
               <div class="form-group">
                 <label>Prénom <span class="required">*</span></label>
@@ -44,10 +47,13 @@
                   name="prenomfor"
                   #prenomfor="ngModel"
                   required
+                  pattern="[A-Za-zÀ-ÿ\s-]+"
                   class="form-input"
                   [ngClass]="{'invalid': prenomfor.invalid && (prenomfor.dirty || prenomfor.touched)}"
                 />
-                <span class="error" *ngIf="prenomfor.invalid && (prenomfor.dirty || prenomfor.touched)">Le prénom est requis.</span>
+                <span class="error" *ngIf="prenomfor.invalid && (prenomfor.dirty || prenomfor.touched)">
+                  {{ prenomfor.errors?.['required'] ? 'Le prénom est requis.' : 'Le prénom ne doit contenir que des lettres, espaces ou tirets.' }}
+                </span>
               </div>
             </div>
           </div>
@@ -121,8 +127,6 @@
           <p><strong>Email :</strong> {{ viewedFormateur?.emailfor }}</p>
           <p><strong>Téléphone :</strong> {{ viewedFormateur?.telfor }}</p>
           <p><strong>Adresse :</strong> {{ viewedFormateur?.adrfor }}</p>
-          <p><strong>Créé le :</strong> {{ viewedFormateur?.created_at }}</p>
-          <p><strong>Mis à jour le :</strong> {{ viewedFormateur?.updated_at }}</p>
         </div>
         <div class="modal-actions">
           <button class="close-btn" (click)="closeViewModal()">Fermer</button>
@@ -178,8 +182,6 @@
             <th>EMAIL</th>
             <th>TÉLÉPHONE</th>
             <th>ADRESSE</th>
-            <th>CRÉÉ LE</th>
-            <th>MIS À JOUR LE</th>
             <th>ACTIONS</th>
           </tr>
         </thead>
@@ -195,8 +197,6 @@
             <td>{{ formateur.emailfor }}</td>
             <td>{{ formateur.telfor }}</td>
             <td>{{ formateur.adrfor }}</td>
-            <td>{{ formateur.created_at }}</td>
-            <td>{{ formateur.updated_at }}</td>
             <td class="actions">
               <button class="action-btn view" (click)="viewFormateur(formateur)" title="Voir">👁️</button>
               <button class="action-btn edit" (click)="openEditFormateurModal(formateur)" title="Éditer">✏️</button>

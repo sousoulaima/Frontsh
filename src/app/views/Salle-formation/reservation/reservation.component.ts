@@ -3,9 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Observable } from 'rxjs';
-import { ReservationSalle, ReservationSalleService } from 'src/app/services/reservation-salle.service';
-import { SalleFormation, SalleFormationService } from 'src/app/services/salle-formation.service';
-import { Formateur, FormateurService } from 'src/app/services/formateur.service';
+import { ReservationSalle, ReservationSalleService } from '../../../services/reservation-salle.service';
+import { SalleFormation, SalleFormationService } from '../../../services/salle-formation.service';
+import { Formateur, FormateurService } from '../../../services/formateur.service';
 
 @Component({
   selector: 'app-reservation',
@@ -49,14 +49,14 @@ export class ReservationComponent implements OnInit {
   reservations: ReservationSalle[] = [];
   filteredReservations: ReservationSalle[] = [];
   currentReservation: Partial<ReservationSalle> = this.resetReservation();
-  salles: SalleFormation[] = []; // Liste des salles
-  formateurs: Formateur[] = []; // Liste des formateurs
+  salles: SalleFormation[] = [];
+  formateurs: Formateur[] = [];
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private reservationService: ReservationSalleService, // Injectez le service des réservations
-    private salleService: SalleFormationService, // Injectez le service des salles
-    private formateurService: FormateurService // Injectez le service des formateurs
+    private reservationService: ReservationSalleService,
+    private salleService: SalleFormationService,
+    private formateurService: FormateurService
   ) {}
 
   ngOnInit(): void {
@@ -66,7 +66,6 @@ export class ReservationComponent implements OnInit {
   }
 
   loadReservations(): void {
-    
     this.reservationService.getAll().subscribe({
       next: (reservations) => {
         this.reservations = reservations;
@@ -99,11 +98,11 @@ export class ReservationComponent implements OnInit {
 
   resetReservation(): Partial<ReservationSalle> {
     return {
-      id: undefined, // L'ID sera généré par le backend
+      id: undefined,
       datereservation: this.today,
       montantreservation: '',
-      salle_formation_codesalle: undefined, // ou null ou ''
-      formateur_codefor: undefined, // ou null ou ''
+      salle_formation_codesalle: undefined,
+      formateur_codefor: undefined,
     };
   }
 
@@ -169,7 +168,7 @@ export class ReservationComponent implements OnInit {
   saveReservation(): void {
     const reservationData = {
       ...this.currentReservation,
-      datereservation: this.currentReservation.datereservation + 'T00:00:00.000Z', // Format ISO 8601 avec Z pour UTC
+      datereservation: this.currentReservation.datereservation + 'T00:00:00.000Z',
       salle_formation_codesalle: this.currentReservation.salle_formation_codesalle,
       formateur_codefor: this.currentReservation.formateur_codefor,
       montantreservation: this.currentReservation.montantreservation,
