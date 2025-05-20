@@ -1,42 +1,5 @@
-:root {
-  --dark-form: rgba(255, 255, 255, 0.8);
-  --dark-input: #f3f4f6;
-  --text-gray: #6b7280; 
-}
-
-:host {
-  display: block;
-  min-height: 100vh;
-}
-
-.form-group {
-  position: relative;
-
-  i {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.125rem;
-    color: #6b7280; 
-  }
-
-  .form-control {
-    border: none;
-    border-bottom: 1px solid #d1d5db; 
-    background: transparent;
-    outline: none;
-    padding-left: 40px;
-    text-align: center;
-    width: 100%;
-
-    &::placeholder {
-      color: #6b7280; 
-      text-align: center;
-    }
-
-    &:focus {
-      border-bottom-color: #2dd4bf; 
-    }
-  }
+.glass {
+  backdrop-filter: blur(12px);
+  background: rgba(186, 12, 12, 0.6);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
 }
