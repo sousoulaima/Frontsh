@@ -20,6 +20,15 @@ import { ModaliteRegService, ModaliteReg } from '../../../services/modalite-reg.
         animate('150ms ease-in', style({ opacity: 0, transform: 'scale(0.9)' })),
       ]),
     ]),
+    trigger('successAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
+      ]),
+    ]),
   ],
 })
 export class ModuleReglementComponent implements OnInit {
@@ -33,6 +42,7 @@ export class ModuleReglementComponent implements OnInit {
   currentModalite: Partial<ModaliteReg> = { designationmod: '' };
   viewedModalite: ModaliteReg | null = null;
   modaliteToDelete: ModaliteReg | null = null;
+  successMessage: string | null = null;
 
   constructor(private modaliteService: ModaliteRegService) {}
 
@@ -43,28 +53,50 @@ export class ModuleReglementComponent implements OnInit {
   loadModalites(): void {
     this.modaliteService.getAll().subscribe({
       next: (data) => {
-        // Si `data` est un tableau d'objets
+        console.log('Raw data from service:', data);
+
+        if (!Array.isArray(data)) {
+          console.error('Expected an array from ModaliteRegService, received:', data);
+          this.modaliteRegs = [];
+          this.filteredModalites = [];
+          return;
+        }
+
         this.modaliteRegs = data.map((item: any) => ({
-          ...item,
-          designationmod: item.designationMod
+          codeMod: item.codeMod || item.code_mod || '',
+          designationmod: item.designationmod || item.designationMod || '',
         }));
-      
-        console.log('Modalités chargées:', this.modaliteRegs);
+
+        console.log('Mapped modaliteRegs:', this.modaliteRegs);
         this.filteredModalites = [...this.modaliteRegs];
       },
       error: (err) => {
         console.error('Erreur lors du chargement des modalités:', err);
-      }
+        this.modaliteRegs = [];
+        this.filteredModalites = [];
+      },
     });
   }
 
   filterModalites(): void {
     const query = this.searchQuery.toLowerCase().trim();
+    console.log('Filtering with query:', query);
+
     this.filteredModalites = query
-      ? this.modaliteRegs.filter(m =>
-          m.designationmod.toLowerCase().includes(query) ||
-          (m.codeMod && m.codeMod.toLowerCase().includes(query)))
+      ? this.modaliteRegs.filter((m) => {
+          const codeMod = m.codeMod ? String(m.codeMod).toLowerCase() : '';
+          const designationmod = m.designationmod ? m.designationmod.toLowerCase() : '';
+
+          const matchesCode = codeMod.includes(query);
+          const matchesDesignation = designationmod.includes(query);
+
+          console.log(`Item: ${JSON.stringify(m)}, Matches: Code=${matchesCode}, Designation=${matchesDesignation}`);
+
+          return matchesCode || matchesDesignation;
+        })
       : [...this.modaliteRegs];
+
+    console.log('Filtered modalites:', this.filteredModalites);
   }
 
   openAddModal(): void {
@@ -85,25 +117,37 @@ export class ModuleReglementComponent implements OnInit {
   }
 
   saveModalite(): void {
-    const payload: any = {
-      designationmod: this.currentModalite.designationmod
-    };
+    if (!this.currentModalite.designationmod) {
+      console.error('Designationmod is required');
+      return;
+    }
 
     if (this.isEditing && this.currentModalite.codeMod) {
+      const payload: ModaliteReg = {
+        codeMod: this.currentModalite.codeMod,
+        designationmod: this.currentModalite.designationmod,
+      };
+
       this.modaliteService.update(this.currentModalite.codeMod, payload).subscribe({
         next: () => {
           this.loadModalites();
           this.closeModal();
+          this.showSuccessMessage('Modalité de Règlement modifiée avec succès');
         },
-        error: (err) => console.error('Erreur lors de la mise à jour:', err)
+        error: (err) => console.error('Erreur lors de la mise à jour:', err),
       });
     } else {
-      this.modaliteService.create(payload).subscribe({
+      const payload: Omit<ModaliteReg, 'codeMod'> = {
+        designationmod: this.currentModalite.designationmod,
+      };
+
+      this.modaliteService.create(payload as ModaliteReg).subscribe({
         next: () => {
           this.loadModalites();
           this.closeModal();
+          this.showSuccessMessage('Modalité de Règlement ajoutée avec succès');
         },
-        error: (err) => console.error('Erreur lors de la création:', err)
+        error: (err) => console.error('Erreur lors de la création:', err),
       });
     }
   }
@@ -135,8 +179,16 @@ export class ModuleReglementComponent implements OnInit {
       next: () => {
         this.loadModalites();
         this.cancelDelete();
+        this.showSuccessMessage('Modalité de Règlement supprimée avec succès');
       },
-      error: (err) => console.error('Erreur lors de la suppression:', err)
+      error: (err) => console.error('Erreur lors de la suppression:', err),
     });
+  }
+
+  showSuccessMessage(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 3000);
   }
 }

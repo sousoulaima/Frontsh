@@ -32,6 +32,15 @@ import { Formateur, FormateurService } from '../../../services/formateur.service
         animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
       ]),
     ]),
+    trigger('fadeAnimation', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-out', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ opacity: 0 })),
+      ]),
+    ]),
   ],
 })
 export class ReservationComponent implements OnInit {
@@ -44,6 +53,8 @@ export class ReservationComponent implements OnInit {
   isEditing = false;
   reservationToDelete: ReservationSalle | null = null;
   viewedReservation: ReservationSalle | null = null;
+  successMessage: string | null = null;
+  showSuccess = false;
   today = new Date().toISOString().split('T')[0];
 
   reservations: ReservationSalle[] = [];
@@ -63,6 +74,18 @@ export class ReservationComponent implements OnInit {
     this.loadReservations();
     this.loadSalles();
     this.loadFormateurs();
+  }
+
+  private displaySuccessMessage(message: string): void {
+    this.successMessage = message;
+    this.showSuccess = true;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.showSuccess = false;
+      this.successMessage = null;
+      this.cdr.detectChanges();
+    }, 3000);
   }
 
   loadReservations(): void {
@@ -183,6 +206,7 @@ export class ReservationComponent implements OnInit {
       next: () => {
         this.loadReservations();
         this.closeModal();
+        this.displaySuccessMessage(this.isEditing ? 'Réservation modifiée avec succès' : 'Réservation ajoutée avec succès');
       },
       error: (err) => console.error('Error saving reservation:', err)
     });
@@ -212,6 +236,7 @@ export class ReservationComponent implements OnInit {
         next: () => {
           this.loadReservations();
           this.cancelDelete();
+          this.displaySuccessMessage('Réservation supprimée avec succès');
         },
         error: (err) => console.error('Error deleting reservation:', err)
       });

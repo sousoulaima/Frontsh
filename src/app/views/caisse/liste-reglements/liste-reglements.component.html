@@ -1,7 +1,12 @@
 <div class="gestion-reglements-container">
   <div class="gestion-reglements">
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="showSuccess" @fadeAnimation>
+      {{ successMessage }}
+    </div>
+
     <!-- Modal for Adding/Editing a Reglement -->
-    <div class="modal" *ngIf="showModal">
+    <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditing ? 'Éditer le règlement' : 'Ajouter un règlement' }}</h2>
         <form (ngSubmit)="saveReglement()" #reglementForm="ngForm">
@@ -105,7 +110,7 @@
     </div>
 
     <!-- Modal for Viewing a Reglement -->
-    <div class="modal" *ngIf="showViewModal">
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">Détails du règlement</h2>
         <div class="user-details">
@@ -125,7 +130,7 @@
     </div>
 
     <!-- Modal for Delete Confirmation -->
-    <div class="modal" *ngIf="showDeleteConfirm">
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">Confirmer la suppression</h2>
         <p class="modal-text">Êtes-vous sûr de vouloir supprimer le règlement {{ reglementToDelete?.codereg }} ?</p>

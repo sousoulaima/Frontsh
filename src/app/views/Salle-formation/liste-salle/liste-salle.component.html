@@ -1,12 +1,18 @@
 <div class="gestion-salles-container">
   <div class="gestion-salles">
-    <div class="modal" *ngIf="showModal">
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="showSuccess" @fadeAnimation>
+      {{ successMessage }}
+    </div>
+
+    <!-- Modal for Adding/Editing a Salle -->
+    <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditing ? 'Modifier la salle' : 'Ajouter une salle' }}</h2>
         <form (ngSubmit)="saveSalle()" #salleForm="ngForm">
           <div class="form-section">
             <h3>Informations de base</h3>
-            <div class="form-grid">
+            <div class="form-row">
               <div class="form-group">
                 <label>Désignation <span class="required">*</span></label>
                 <input
@@ -21,7 +27,6 @@
                 />
                 <span class="error" *ngIf="designationsalle.invalid && (designationsalle.dirty || designationsalle.touched)">La désignation est obligatoire</span>
               </div>
-
               <div class="form-group">
                 <label>Capacité <span class="required">*</span></label>
                 <input
@@ -42,13 +47,13 @@
 
           <div class="form-section">
             <h3>Tarification</h3>
-            <div class="form-grid">
+            <div class="form-row">
               <div class="form-group">
                 <label>Prix par jour</label>
                 <select
                   [(ngModel)]="currentSalle.prixJour"
                   name="prixJour"
-                  class="form-select"
+                  class="form-input"
                   (change)="updatePriveStatus()"
                 >
                   <option *ngFor="let option of prixOptions" [value]="option.value" [selected]="option.value === currentSalle.prixJour">
@@ -59,13 +64,12 @@
                   <i class="fas fa-lock"></i> Ce tarif est considéré comme privé
                 </small>
               </div>
-
               <div class="form-group">
                 <label>Prix par heure</label>
                 <select
                   [(ngModel)]="currentSalle.prixHeure"
                   name="prixHeure"
-                  class="form-select"
+                  class="form-input"
                   (change)="updatePriveStatus()"
                 >
                   <option *ngFor="let option of prixOptions" [value]="option.value" [selected]="option.value === currentSalle.prixHeure">
@@ -86,8 +90,13 @@
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
-            <button type="submit" class="save-btn" [disabled]="!salleForm.valid">
+            <button type="button" class="cancel-btn" (click)="closeModal()" aria-label="Annuler">Annuler</button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="!salleForm.valid"
+              aria-label="Sauvegarder"
+            >
               <i class="fas fa-save"></i> {{ isEditing ? 'Mettre à jour' : 'Enregistrer' }}
             </button>
           </div>
@@ -95,75 +104,59 @@
       </div>
     </div>
 
-    <div class="modal" *ngIf="showViewModal">
+    <!-- Modal for Viewing a Salle -->
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">Détails de la salle</h2>
-        <div class="salle-details">
-          <div class="detail-item">
-            <span class="detail-label">Code:</span>
-            <span class="detail-value">{{ viewedSalle?.codesalle || 'N/A' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Désignation:</span>
-            <span class="detail-value">{{ viewedSalle?.designationsalle }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Capacité:</span>
-            <span class="detail-value">{{ viewedSalle?.capacitesalle }} personnes</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Prix journée:</span>
-            <span class="detail-value">{{ viewedSalle?.prives_j ? '35 DT (Privé)' : '25 DT (Standard)' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Prix heure:</span>
-            <span class="detail-value">{{ viewedSalle?.prives_n ? '35 DT (Privé)' : '25 DT (Standard)' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Statut:</span>
-            <span class="detail-value">
-              <span class="badge" [ngClass]="{'badge-success': viewedSalle?.prives_j || viewedSalle?.prives_n, 'badge-secondary': !(viewedSalle?.prives_j || viewedSalle?.prives_n)}">
-                {{ getPriveLabel(!!(viewedSalle?.prives_j || viewedSalle?.prives_n)) }}
-              </span>
+        <div class="user-details">
+          <p><strong>Code:</strong> {{ viewedSalle?.codesalle || 'N/A' }}</p>
+          <p><strong>Désignation:</strong> {{ viewedSalle?.designationsalle || 'N/A' }}</p>
+          <p><strong>Capacité:</strong> {{ viewedSalle?.capacitesalle || 'N/A' }} personnes</p>
+          <p><strong>Prix journée:</strong> {{ viewedSalle?.prives_j ? '35 DT (Privé)' : '25 DT (Standard)' }}</p>
+          <p><strong>Prix heure:</strong> {{ viewedSalle?.prives_n ? '35 DT (Privé)' : '25 DT (Standard)' }}</p>
+          <p><strong>Statut:</strong>
+            <span [ngClass]="{'badge-success': viewedSalle?.prives_j || viewedSalle?.prives_n, 'badge-secondary': !(viewedSalle?.prives_j || viewedSalle?.prives_n)}">
+              {{ getPriveLabel(!!(viewedSalle?.prives_j || viewedSalle?.prives_n)) }}
             </span>
-          </div>
+          </p>
         </div>
         <div class="modal-actions">
-          <button type="button" class="close-btn" (click)="closeViewModal()">Fermer</button>
+          <button class="close-btn" (click)="closeViewModal()" aria-label="Fermer">Fermer</button>
         </div>
       </div>
     </div>
 
-    <div class="modal" *ngIf="showDeleteConfirm">
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">Confirmation de suppression</h2>
         <div class="confirmation-message">
           <p>Êtes-vous sûr de vouloir supprimer la salle suivante ?</p>
           <div class="salle-info">
-            <strong>{{ salleToDelete?.designationsalle }}</strong> (Capacité: {{ salleToDelete?.capacitesalle }} personnes)
+            <strong>{{ salleToDelete?.designationsalle || 'N/A' }}</strong> (Capacité: {{ salleToDelete?.capacitesalle || 'N/A' }} personnes)
           </div>
         </div>
         <div class="modal-actions">
-          <button type="button" class="cancel-btn" (click)="cancelDelete()">Annuler</button>
-          <button type="button" class="delete-btn" (click)="deleteSalle()">
+          <button class="cancel-btn" (click)="cancelDelete()" aria-label="Annuler">Annuler</button>
+          <button class="delete-btn" (click)="deleteSalle()" aria-label="Supprimer">
             <i class="fas fa-trash-alt"></i> Supprimer
           </button>
         </div>
       </div>
     </div>
 
+    <!-- Header Section -->
     <div class="header">
       <div class="header-title">
-        <h1 class="text-blue-800 animate-fade-in"><i class="fas fa-chalkboard-teacher"></i> Gestion des salles de formation</h1>
-        <p class="text-gray-600 animate-fade-in">Total: {{ filteredSalles.length }} salle(s)</p>
+        <h1>Gestion des salles de formation</h1>
+        <p>Total: {{ filteredSalles.length }} salle(s)</p>
       </div>
       <div class="actions">
-        <button class="add-btn" (click)="openAddSalleModal()">
-          <i class="fas fa-plus"></i> Ajouter une salle
-        </button>
+        <button class="add-btn" (click)="openAddSalleModal()" aria-label="Ajouter une salle">+ Ajouter une salle</button>
       </div>
     </div>
 
+    <!-- Search Section -->
     <div class="search-filter">
       <div class="search">
         <input
@@ -172,11 +165,13 @@
           placeholder="Rechercher une salle..."
           [(ngModel)]="searchQuery"
           (input)="filterSalles()"
+          aria-label="Rechercher une salle"
         />
-        <span class="search-icon"><i class="fas fa-search"></i></span>
+        <span class="search-icon">🔍</span>
       </div>
     </div>
 
+    <!-- Salles Table -->
     <div class="table-container">
       <table>
         <thead>
@@ -186,24 +181,24 @@
             <th>Capacité</th>
             <th>Prix/jour</th>
             <th>Prix/heure</th>
-            <th>Actions</th>
+            <th>ACTIONS</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let salle of filteredSalles; let i = index" class="animate-slide-in-right" [ngClass]="'animation-delay-' + (i * 100)">
-            <td>{{ salle.codesalle }}</td>
-            <td>{{ salle.designationsalle }}</td>
-            <td>{{ salle.capacitesalle }}</td>
+          <tr *ngFor="let salle of filteredSalles">
+            <td>{{ salle.codesalle || 'N/A' }}</td>
+            <td>{{ salle.designationsalle || 'N/A' }}</td>
+            <td>{{ salle.capacitesalle || 'N/A' }}</td>
             <td>{{ salle.prives_j ? '35 DT' : '25 DT' }}</td>
             <td>{{ salle.prives_n ? '35 DT' : '25 DT' }}</td>
             <td class="actions">
-              <button class="action-btn view" (click)="viewSalle(salle)" title="Voir">👁️</button>
-              <button class="action-btn edit" (click)="openEditSalleModal(salle)" title="Éditer">✏️</button>
-              <button class="action-btn delete" (click)="confirmDeleteSalle(salle)" title="Supprimer">🗑️</button>
+              <button class="action-btn view" (click)="viewSalle(salle)" title="Voir" aria-label="Voir les détails">👁️</button>
+              <button class="action-btn edit" (click)="openEditSalleModal(salle)" title="Éditer" aria-label="Éditer la salle">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteSalle(salle)" title="Supprimer" aria-label="Supprimer la salle">🗑️</button>
             </td>
           </tr>
           <tr *ngIf="filteredSalles.length === 0">
-            <td colspan="7" class="text-center no-results">
+            <td colspan="6" class="text-center no-results">
               <i class="fas fa-info-circle"></i> Aucune salle trouvée
             </td>
           </tr>

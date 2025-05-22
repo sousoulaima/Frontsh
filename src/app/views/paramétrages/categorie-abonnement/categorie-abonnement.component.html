@@ -1,5 +1,10 @@
 <div class="gestion-categories-container">
   <div class="gestion-categories">
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="successMessage" @successAnimation>
+      {{ successMessage }}
+    </div>
+
     <!-- Modal for Adding/Editing a Category -->
     <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
@@ -16,21 +21,63 @@
             />
           </div>
           <div class="form-group">
-            <label>Désignation*</label>
+            <label>Désignation <span class="required">*</span></label>
             <input
               type="text"
               [(ngModel)]="currentCategorie.designationcateg"
               name="designationcateg"
               required
+              #designationcateg="ngModel"
               class="form-input"
               placeholder="Entrez la désignation"
+              [ngClass]="{'invalid': designationcateg.invalid && designationcateg.touched}"
             />
+            <span class="error" *ngIf="designationcateg.invalid && designationcateg.touched">La désignation est requise</span>
           </div>
           <div class="modal-actions">
-            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
-            <button type="submit" class="save-btn" [disabled]="!categorieForm.valid">Enregistrer</button>
+            <button type="button" class="cancel-btn" (click)="closeModal()" aria-label="Annuler">Annuler</button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="!categorieForm.valid"
+              aria-label="Enregistrer"
+            >Enregistrer</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing a Category -->
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Détails de la catégorie</h2>
+        <div class="user-details">
+          <p><strong>Code :</strong> {{ viewedCategorie?.codecateg || 'N/A' }}</p>
+          <p><strong>Désignation :</strong> {{ viewedCategorie?.designationcateg || 'N/A' }}</p>
+          <div *ngIf="viewedCategorie?.abonnements?.length">
+            <strong>Abonnements :</strong>
+            <ul>
+              <li *ngFor="let abo of viewedCategorie?.abonnements">
+                {{ abo.designation || 'N/A' }} ({{ abo.nbMois || 0 }} mois, {{ abo.nbJours || 0 }} jours, {{ abo.forfait || 0 }} DT, {{ abo.accesLibre ? 'Accès libre' : 'Accès limité' }}, {{ abo.nbSeanceSemaine === -1 ? 'Illimité' : (abo.nbSeanceSemaine || 0) }} séances/semaine)
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="close-btn" (click)="closeViewModal()" aria-label="Fermer">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmer la suppression</h2>
+        <p class="modal-text">Êtes-vous sûr de vouloir supprimer la catégorie "{{ categorieToDelete?.designationcateg || 'N/A' }}" ?</p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="cancelDelete()" aria-label="Annuler">Annuler</button>
+          <button class="delete-btn" (click)="deleteCategorie()" aria-label="Supprimer">Supprimer</button>
+        </div>
       </div>
     </div>
 
@@ -40,7 +87,9 @@
         <h1>Catégories d'Abonnement</h1>
         <p>Liste des catégories d'abonnement ({{ filteredCategories.length }} catégories)</p>
       </div>
-      <button class="add-btn" (click)="openAddModal()">+ Ajouter une catégorie</button>
+      <div class="actions">
+        <button class="add-btn" (click)="openAddModal()" aria-label="Ajouter une catégorie">+ Ajouter une catégorie</button>
+      </div>
     </div>
 
     <!-- Search Section -->
@@ -48,12 +97,14 @@
       <div class="search">
         <input
           type="text"
-          placeholder="Rechercher une catégorie..."
-          [(ngModel)]="searchTerm"
-          (input)="filterCategories()"
           class="search-input"
+          placeholder="Rechercher une catégorie ou abonnement..."
+          [value]="searchTerm"
+          (input)="onSearchInput($event)"
+          aria-label="Rechercher une catégorie ou abonnement"
         />
         <span class="search-icon">🔍</span>
+        <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()" aria-label="Effacer la recherche">✖</button>
       </div>
     </div>
 
@@ -69,42 +120,21 @@
         </thead>
         <tbody>
           <tr *ngFor="let categorie of filteredCategories">
-            <td>{{ categorie.codecateg }}</td>
-            <td>{{ categorie.designationcateg }}</td>
+            <td>{{ categorie.codecateg || 'N/A' }}</td>
+            <td>{{ categorie.designationcateg || 'N/A' }}</td>
             <td class="actions">
-              <button class="action-btn view" (click)="viewCategorie(categorie)" title="Voir">👁️</button>
-              <button class="action-btn edit" (click)="openEditModal(categorie)" title="Éditer">✏️</button>
-              <button class="action-btn delete" (click)="confirmDeleteCategorie(categorie)" title="Supprimer">🗑️</button>
+              <button class="action-btn view" (click)="viewCategorie(categorie)" title="Voir" aria-label="Voir les détails">👁️</button>
+              <button class="action-btn edit" (click)="openEditModal(categorie)" title="Éditer" aria-label="Éditer la catégorie">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteCategorie(categorie)" title="Supprimer" aria-label="Supprimer la catégorie">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredCategories.length === 0">
+            <td colspan="3" class="text-center no-results">
+              <i class="fas fa-info-circle"></i> Aucune catégorie trouvée
             </td>
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- Modal for Viewing a Category -->
-    <div class="modal" *ngIf="showViewModal" @modalAnimation>
-      <div class="modal-content">
-        <h2 class="modal-title">Détails de la catégorie</h2>
-        <div class="user-details">
-          <p><strong>Code :</strong> {{ viewedCategorie?.codecateg }}</p>
-          <p><strong>Désignation :</strong> {{ viewedCategorie?.designationcateg }}</p>
-        </div>
-        <div class="modal-actions">
-          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal for Delete Confirmation -->
-    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
-      <div class="modal-content">
-        <h2 class="modal-title">Confirmer la suppression</h2>
-        <p class="modal-text">Êtes-vous sûr de vouloir supprimer la catégorie "{{ categorieToDelete?.designationcateg }}" ?</p>
-        <div class="modal-actions">
-          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
-          <button class="delete-btn" (click)="deleteCategorie()">Supprimer</button>
-        </div>
-      </div>
     </div>
   </div>
 </div>

@@ -22,6 +22,15 @@ import { Router } from '@angular/router';
         animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.9)' })),
       ]),
     ]),
+    trigger('successAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
+      ]),
+    ]),
   ],
 })
 export class GestionUtilisateursComponent implements OnInit {
@@ -39,6 +48,7 @@ export class GestionUtilisateursComponent implements OnInit {
   viewedUser: User | null = null;
   userToDelete: User | null = null;
   errorMessage: string | null = null;
+  successMessage: string | null = null;
 
   constructor(
     private userService: UserService,
@@ -117,6 +127,7 @@ export class GestionUtilisateursComponent implements OnInit {
         next: () => {
           this.loadUsers();
           this.closeModal();
+          this.showSuccessMessage('Utilisateur modifié avec succès');
         },
         error: (error) => {
           console.error('Erreur lors de la mise à jour:', error);
@@ -139,6 +150,7 @@ export class GestionUtilisateursComponent implements OnInit {
         next: () => {
           this.loadUsers();
           this.closeModal();
+          this.showSuccessMessage('Utilisateur ajouté avec succès');
         },
         error: (error) => {
           console.error('Erreur lors de l’ajout:', error);
@@ -185,6 +197,7 @@ export class GestionUtilisateursComponent implements OnInit {
         next: () => {
           this.loadUsers();
           this.cancelDelete();
+          this.showSuccessMessage('Utilisateur supprimé avec succès');
         },
         error: (error) => {
           console.error('Erreur lors de la suppression:', error);
@@ -212,5 +225,13 @@ export class GestionUtilisateursComponent implements OnInit {
       default:
         return '';
     }
+  }
+
+  showSuccessMessage(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = null;
+      this.cdr.detectChanges();
+    }, 3000);
   }
 }

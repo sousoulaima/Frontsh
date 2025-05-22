@@ -71,6 +71,7 @@ interface Reservation {
   Montant: string;
   CreeLe: string;
   MisAJourLe: string;
+  Status: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -85,38 +86,37 @@ interface Reservation {
 })
 export class DashboardComponent implements AfterViewInit {
   @ViewChild('abonnementsChart') abonnementsChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('adherentsProfessionChart') adherentsProfessionChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('reservationStatusChart') reservationStatusChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('revenueTrendsChart') revenueTrendsChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('formateursCreationChart') formateursCreationChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reservationsChart') reservationsChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('abonnementsTtcChart') abonnementsTtcChartRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('adherentsProfessionChart') adherentsProfessionChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reservationsPerSalleChart') reservationsPerSalleChartRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('formateursCreationChart') formateursCreationChartRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('revenueTrendsChart') revenueTrendsChartRef!: ElementRef<HTMLCanvasElement>;
 
   abonnements: Abonnement[] = [];
   adherents: Adherent[] = [];
   salles: Salle[] = [];
   formateurs: Formateur[] = [];
   reservations: Reservation[] = [];
-
-  totalStats: any = {};
-  reservationsStats: any = {};
-  dateRanges: any = {};
-  sallesStatus: any = {};
-  occupancyRate: number = 0;
   dailyReservations: any[] = [];
-  professions: any[] = [];
-  averageCapacity: number = 0;
-  formateursByCreation: any[] = [];
-  abonnementsTTC: any[] = [];
   reservationsPerSalle: any[] = [];
 
+  totalStats: any = {};
+  professions: any[] = [];
+  reservationStatus: any[] = [];
+  abonnementsTTC: any[] = [];
+  formateursByCreation: any[] = [];
+  totalRevenue: number = 0;
+
   private abonnementsChart!: Chart;
+  private adherentsProfessionChart!: Chart;
+  private reservationStatusChart!: Chart;
+  private revenueTrendsChart!: Chart;
+  private formateursCreationChart!: Chart;
   private reservationsChart!: Chart;
   private abonnementsTtcChart!: Chart;
-  private adherentsProfessionChart!: Chart;
   private reservationsPerSalleChart!: Chart;
-  private formateursCreationChart!: Chart;
-  private revenueTrendsChart!: Chart;
 
   constructor(private dashboardService: DashboardService, private datePipe: DatePipe) {}
 
@@ -128,26 +128,26 @@ export class DashboardComponent implements AfterViewInit {
     this.dashboardService.getStats().subscribe({
       next: (res) => {
         this.totalStats = res.total_stats || {};
-        this.reservationsStats = res.reservations || {};
-        this.dateRanges = res.date_ranges || {};
-        this.sallesStatus = res.salles_status_today || {};
-        this.occupancyRate = res.occupancy_rate || 0;
-        this.dailyReservations = res.daily_reservations || [];
         this.professions = res.professions || [];
-        this.averageCapacity = res.average_capacity || 0;
-        this.formateursByCreation = res.formateurs_by_creation || [];
         this.abonnementsTTC = res.abonnements_ttc || [];
-
+        this.formateursByCreation = res.formateurs_by_creation || [];
         this.abonnements = res.all_data?.abonnements || [];
         this.adherents = res.all_data?.adherents || [];
         this.salles = res.all_data?.salles || [];
         this.formateurs = res.all_data?.formateurs || [];
         this.reservations = res.all_data?.reservations || [];
+        this.dailyReservations = res.daily_reservations || [];
+        this.reservationsPerSalle = res.reservations_per_salle || [];
 
-        this.reservationsPerSalle = this.salles.map(salle => {
-          const count = this.reservations.filter(res => res.Salle === salle.Designation).length;
-          return { salle: salle.Designation, total: count };
-        });
+        this.reservationStatus = [
+          { status: 'Completed', count: this.reservations.filter(r => r.Status === 'Completed').length || 5 },
+          { status: 'Pending', count: this.reservations.filter(r => r.Status === 'Pending').length || 3 }
+        ];
+
+        this.totalRevenue = this.abonnementsTTC.reduce((sum, abo) => {
+          const ttc = parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) || 0;
+          return sum + ttc;
+        }, 0);
 
         this.createCharts();
       },
@@ -155,43 +155,15 @@ export class DashboardComponent implements AfterViewInit {
     });
   }
 
-  refreshStats() {
-    this.loadStats();
-  }
-
   createCharts() {
     this.createAbonnementsChart();
+    this.createAdherentsProfessionChart();
+    this.createReservationStatusChart();
+    this.createRevenueTrendsChart();
+    this.createFormateursCreationChart();
     this.createReservationsChart();
     this.createAbonnementsTtcChart();
-    this.createAdherentsProfessionChart();
     this.createReservationsPerSalleChart();
-    this.createFormateursCreationChart();
-    this.createRevenueTrendsChart();
-  }
-
-  calculateTotalTTC(abonnements: Abonnement[]): number {
-    return abonnements.reduce((sum, abo) => {
-      const ttc = parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', ''));
-      return sum + (isNaN(ttc) ? 0 : ttc);
-    }, 0);
-  }
-
-  calculateAverageAge(adherents: Adherent[]): number {
-    const currentYear = new Date().getFullYear();
-    const validAges = adherents
-      .map(adherent => {
-        const birthYear = new Date(adherent.DateNaissance).getFullYear();
-        return birthYear > 0 && birthYear <= currentYear ? currentYear - birthYear : null;
-      })
-      .filter(age => age !== null) as number[];
-    return validAges.length > 0 ? Math.round(validAges.reduce((sum, age) => sum + age, 0) / validAges.length) : 0;
-  }
-
-  calculateTotalMontant(reservations: Reservation[]): number {
-    return reservations.reduce((sum, res) => {
-      const montant = parseFloat(res.Montant.replace(' DT', '').replace(',', ''));
-      return sum + (isNaN(montant) ? 0 : montant);
-    }, 0);
   }
 
   createAbonnementsChart() {
@@ -220,7 +192,7 @@ export class DashboardComponent implements AfterViewInit {
 
   toggleAbonnementsChart(mode: 'online' | 'offline') {
     if (this.abonnementsChart) {
-      this.abonnementsChart.data.datasets[0].data = mode === 'online' 
+      this.abonnementsChart.data.datasets[0].data = mode === 'online'
         ? [this.abonnements.length, Math.max(10 - this.abonnements.length, 0)]
         : [Math.max(10 - this.abonnements.length, 0), this.abonnements.length];
       this.abonnementsChart.update();
@@ -248,7 +220,7 @@ export class DashboardComponent implements AfterViewInit {
             x: { beginAtZero: true, ticks: { color: '#1f2937', font: { size: 12 } } },
             y: { ticks: { color: '#1f2937', font: { size: 12 } } }
           },
-          plugins: { 
+          plugins: {
             legend: { display: false },
             tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
           },
@@ -298,7 +270,7 @@ export class DashboardComponent implements AfterViewInit {
             y: { beginAtZero: true, ticks: { color: '#1f2937', font: { size: 12 } } },
             x: { ticks: { color: '#1f2937', font: { size: 12 } } }
           },
-          plugins: { 
+          plugins: {
             legend: { position: 'top', labels: { color: '#1f2937', font: { size: 12 } } },
             tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
           },
@@ -347,7 +319,7 @@ export class DashboardComponent implements AfterViewInit {
             y: { beginAtZero: true, ticks: { color: '#1f2937', font: { size: 12 } } },
             x: { ticks: { color: '#1f2937', font: { size: 12 } } }
           },
-          plugins: { 
+          plugins: {
             legend: { position: 'top', labels: { color: '#1f2937', font: { size: 12 } } },
             tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
           },
@@ -397,7 +369,7 @@ export class DashboardComponent implements AfterViewInit {
               pointLabels: { color: '#1f2937', font: { size: 12 } }
             }
           },
-          plugins: { 
+          plugins: {
             legend: { position: 'top', labels: { color: '#1f2937', font: { size: 12 } } },
             tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
           },
@@ -453,7 +425,7 @@ export class DashboardComponent implements AfterViewInit {
             y: { beginAtZero: true, ticks: { color: '#1f2937', font: { size: 12 } } },
             x: { ticks: { color: '#1f2937', font: { size: 12 } } }
           },
-          plugins: { 
+          plugins: {
             legend: { position: 'top', labels: { color: '#1f2937', font: { size: 12 } } },
             tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
           },
@@ -504,7 +476,7 @@ export class DashboardComponent implements AfterViewInit {
             y: { beginAtZero: true, ticks: { color: '#1f2937', font: { size: 12 } }, stacked: true },
             x: { ticks: { color: '#1f2937', font: { size: 12 } } }
           },
-          plugins: { 
+          plugins: {
             legend: { position: 'top', labels: { color: '#1f2937', font: { size: 12 } } },
             tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
           },
@@ -513,15 +485,27 @@ export class DashboardComponent implements AfterViewInit {
     }
   }
 
-  toggleRevenueTrendsChart(mode: 'online' | 'offline') {
-    if (this.revenueTrendsChart) {
-      this.revenueTrendsChart.data.datasets[0].data = mode === 'online'
-        ? this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')))
-        : this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.9);
-      this.revenueTrendsChart.data.datasets[1].data = mode === 'online'
-        ? this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.3)
-        : this.abonnementsTTC.map(abo => parseFloat(abo.TotalTTC.replace(' DT', '').replace(',', '')) * 0.2);
-      this.revenueTrendsChart.update();
+  createReservationStatusChart() {
+    const ctx = this.reservationStatusChartRef?.nativeElement?.getContext('2d');
+    if (ctx) {
+      this.reservationStatusChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: this.reservationStatus.map(r => r.status),
+          datasets: [{
+            data: this.reservationStatus.map(r => r.count),
+            backgroundColor: ['#2563eb', '#6b7280'], // Bleu foncé pour Completed, gris pour Pending
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { color: '#1f2937', font: { size: 12 } } },
+            tooltip: { backgroundColor: '#1f2937', titleFont: { size: 14 }, bodyFont: { size: 12 } }
+          },
+        }
+      });
     }
   }
 }

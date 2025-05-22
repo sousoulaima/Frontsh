@@ -1,5 +1,10 @@
 <div class="gestion-types-abonnement-container">
   <div class="gestion-types-abonnement">
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="successMessage" @successAnimation>
+      {{ successMessage }}
+    </div>
+
     <!-- Modal for Adding/Editing a Subscription -->
     <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
@@ -197,7 +202,7 @@
           <tr *ngFor="let subscription of filteredSubscriptions">
             <td>{{ subscription.code }}</td>
             <td>{{ subscription.designation }}</td>
-            <td>{{ subscription.categorieName  }}</td>
+            <td>{{ subscription.categorieName }}</td>
             <td>{{ subscription.nbMois }}</td>
             <td>{{ subscription.nbJours }}</td>
             <td>{{ subscription.forfait }} DT</td>

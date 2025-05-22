@@ -1,5 +1,10 @@
 <div class="gestion-modalites-container">
   <div class="gestion-modalites">
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="successMessage" @successAnimation>
+      {{ successMessage }}
+    </div>
+
     <!-- Modal for Adding/Editing a Modalité -->
     <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
@@ -28,27 +33,61 @@
               #designationmod="ngModel"
               class="form-input"
               placeholder="Entrez la désignation"
+              [ngClass]="{'invalid': designationmod.invalid && designationmod.touched}"
             />
             <span class="error" *ngIf="designationmod.invalid && designationmod.touched">La désignation est requise</span>
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
-            <button type="submit" class="save-btn" [disabled]="!modaliteForm.valid">Enregistrer</button>
+            <button type="button" class="cancel-btn" (click)="closeModal()" aria-label="Annuler">Annuler</button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="!modaliteForm.valid"
+              aria-label="Enregistrer"
+            >Enregistrer</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing a Modalité -->
+    <div class="modal" *ngIf="showViewModal" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Détails de la modalité</h2>
+        <div class="user-details">
+          <p><strong>Code Modalité :</strong> {{ viewedModalite?.codeMod || 'N/A' }}</p>
+          <p><strong>Désignation Modalité :</strong> {{ viewedModalite?.designationmod || 'N/A' }}</p>
+        </div>
+        <div class="modal-actions">
+          <button class="close-btn" (click)="closeViewModal()" aria-label="Fermer">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
+      <div class="modal-content">
+        <h2 class="modal-title">Confirmer la suppression</h2>
+        <p class="modal-text">
+          Êtes-vous sûr de vouloir supprimer la modalité {{ modaliteToDelete?.designationmod || 'N/A' }} ?
+        </p>
+        <div class="modal-actions">
+          <button class="cancel-btn" (click)="cancelDelete()" aria-label="Annuler">Annuler</button>
+          <button class="delete-btn" (click)="deleteModalite()" aria-label="Supprimer">Supprimer</button>
+        </div>
       </div>
     </div>
 
     <!-- Header Section -->
     <div class="header">
       <div class="header-title">
-        <h1 class="text-blue-800 animate-fade-in">Modalités de Règlement</h1>
-        <p class="text-gray-600 animate-fade-in">
-          Liste des modalités de règlement ({{ filteredModalites.length }} modalités)
-        </p>
+        <h1>Modalités de Règlement</h1>
+        <p>Liste des modalités de règlement ({{ filteredModalites.length }} modalités)</p>
       </div>
-      <button class="add-btn bg-blue-600 hover:bg-blue-700 text-white" (click)="openAddModal()">+ Ajouter une modalité</button>
+      <div class="actions">
+        <button class="add-btn" (click)="openAddModal()" aria-label="Ajouter une modalité">+ Ajouter une modalité</button>
+      </div>
     </div>
 
     <!-- Search Section -->
@@ -56,10 +95,11 @@
       <div class="search">
         <input
           type="text"
+          class="search-input"
           placeholder="Rechercher une modalité..."
           [(ngModel)]="searchQuery"
           (input)="filterModalites()"
-          class="search-input"
+          aria-label="Rechercher une modalité"
         />
         <span class="search-icon">🔍</span>
       </div>
@@ -76,49 +116,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let modalite of filteredModalites; let i = index"
-            class="animate-slide-in-right"
-            [ngClass]="'animation-delay-' + (i * 100)"
-          >
-            <td>{{ modalite.codeMod }}</td>
-            <td>{{ modalite.designationmod }}</td>
+          <tr *ngFor="let modalite of filteredModalites">
+            <td>{{ modalite.codeMod || 'N/A' }}</td>
+            <td>{{ modalite.designationmod || 'N/A' }}</td>
             <td class="actions">
-              <button class="action-btn view" (click)="viewModalite(modalite)" title="Voir">👁️</button>
-              <button class="action-btn edit" (click)="openEditModal(modalite)" title="Éditer">✏️</button>
-              <button class="action-btn delete" (click)="confirmDeleteModalite(modalite)" title="Supprimer">🗑️</button>
+              <button class="action-btn view" (click)="viewModalite(modalite)" title="Voir" aria-label="Voir les détails">👁️</button>
+              <button class="action-btn edit" (click)="openEditModal(modalite)" title="Éditer" aria-label="Éditer la modalité">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteModalite(modalite)" title="Supprimer" aria-label="Supprimer la modalité">🗑️</button>
             </td>
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- Modal for Viewing a Modalité -->
-    <div class="modal" *ngIf="showViewModal" @modalAnimation>
-      <div class="modal-content">
-        <h2 class="modal-title">Détails de la modalité</h2>
-        <div class="user-details">
-          <p><strong>Code Modalité :</strong> {{ viewedModalite?.codeMod }}</p>
-          <p><strong>Désignation Modalité :</strong> {{ viewedModalite?.designationmod }}</p>
-        </div>
-        <div class="modal-actions">
-          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal for Delete Confirmation -->
-    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
-      <div class="modal-content">
-        <h2 class="modal-title">Confirmer la suppression</h2>
-        <p class="modal-text">
-          Êtes-vous sûr de vouloir supprimer la modalité {{ modaliteToDelete?.designationmod }} ?
-        </p>
-        <div class="modal-actions">
-          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
-          <button class="delete-btn" (click)="deleteModalite()">Supprimer</button>
-        </div>
-      </div>
     </div>
   </div>
 </div>

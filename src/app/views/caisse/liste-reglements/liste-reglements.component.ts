@@ -5,13 +5,36 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ReglementService, Reglement } from '../../../services/reglement.service';
 import { ModaliteRegService, ModaliteReg } from '../../../services/modalite-reg.service';
 import { AbonnementService, Abonnement } from '../../../services/abonnement.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-liste-reglements',
   templateUrl: './liste-reglements.component.html',
   styleUrls: ['./liste-reglements.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
+  animations: [
+    // Modal animation (already present from previous request)
+    trigger('modalAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.8)' })),
+      ]),
+    ]),
+    // Animation for success message
+    trigger('fadeAnimation', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-out', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ opacity: 0 })),
+      ]),
+    ]),
+  ],
 })
 export class ListeReglementsComponent implements OnInit {
   searchQuery = '';
@@ -21,6 +44,8 @@ export class ListeReglementsComponent implements OnInit {
   isEditing = false;
   reglementToDelete: Reglement | null = null;
   viewedReglement: Reglement | null = null;
+  successMessage: string | null = null;
+  showSuccess = false;
 
   reglements: Reglement[] = [];
   filteredReglements: Reglement[] = [];
@@ -43,6 +68,20 @@ export class ListeReglementsComponent implements OnInit {
         this.loadReglements();
       });
     });
+  }
+
+  // Method to display success message
+  private displaySuccessMessage(message: string): void {
+    this.successMessage = message;
+    this.showSuccess = true;
+    this.cdr.detectChanges();
+
+    // Automatically hide the message after 3 seconds
+    setTimeout(() => {
+      this.showSuccess = false;
+      this.successMessage = null;
+      this.cdr.detectChanges();
+    }, 3000);
   }
 
   loadModalites(): Promise<void> {
@@ -206,6 +245,7 @@ export class ListeReglementsComponent implements OnInit {
         next: () => {
           this.loadReglements();
           this.closeModal();
+          this.displaySuccessMessage('Règlement modifié avec succès');
         },
         error: (err: HttpErrorResponse) => console.error('Error updating reglement:', err)
       });
@@ -214,6 +254,7 @@ export class ListeReglementsComponent implements OnInit {
         next: () => {
           this.loadReglements();
           this.closeModal();
+          this.displaySuccessMessage('Règlement ajouté avec succès');
         },
         error: (err: HttpErrorResponse) => console.error('Error creating reglement:', err)
       });
@@ -244,6 +285,7 @@ export class ListeReglementsComponent implements OnInit {
         next: () => {
           this.loadReglements();
           this.cancelDelete();
+          this.displaySuccessMessage('Règlement supprimé avec succès');
         },
         error: (err: HttpErrorResponse) => console.error('Error deleting reglement:', err)
       });

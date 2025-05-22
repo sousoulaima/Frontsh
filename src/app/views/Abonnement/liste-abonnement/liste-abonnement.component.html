@@ -3,183 +3,141 @@
     <!-- Modal for Editing an Abonnement -->
     <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
-        <h2 class="modal-title">{{ isEditing ? 'Éditer' : 'Ajouter' }} l'abonnement</h2>
+        <h2 class="modal-title">Modifier l'abonnement</h2>
         <form (ngSubmit)="saveAbonnement()" #abonnementForm="ngForm">
-          <div class="form-group" *ngIf="isEditing">
-            <label>CodeAbo</label>
-            <input
-              type="text"
-              [(ngModel)]="currentAbonnement.codeabo"
-              name="codeabo"
-              required
-              readonly
-              class="form-input"
-            />
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="datedeb">DateDeb</label>
+              <input
+                id="datedeb"
+                type="date"
+                [(ngModel)]="currentAbonnement.datedeb"
+                name="datedeb"
+                required
+                class="form-input"
+                (change)="updateDateFin()"
+                aria-label="Date de début"
+                #datedeb="ngModel"
+              />
+              <span class="error" *ngIf="datedeb.invalid && datedeb.touched">Date de début requise</span>
+            </div>
+            <div class="form-group">
+              <label for="datefin">DateFin</label>
+              <input
+                id="datefin"
+                type="date"
+                [(ngModel)]="currentAbonnement.datefin"
+                name="datefin"
+                required
+                readonly
+                class="form-input"
+                aria-label="Date de fin"
+              />
+            </div>
+            <div class="form-group">
+              <label for="totalremise">Remise (%)</label>
+              <select
+                id="totalremise"
+                [(ngModel)]="currentAbonnement.totalremise"
+                name="totalremise"
+                required
+                class="form-input"
+                (change)="updateFinancials(currentAbonnement)"
+                aria-label="Sélectionner une remise en pourcentage"
+                #totalremise="ngModel"
+              >
+                <option value="0">Aucune remise</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+                <option value="25">25%</option>
+              </select>
+              <span class="error" *ngIf="totalremise.invalid && totalremise.touched">Valeur requise</span>
+            </div>
+            <div class="form-group">
+              <label for="totalht">TotalNHT (DT)</label>
+              <input
+                id="totalht"
+                type="number"
+                [(ngModel)]="currentAbonnement.totalht"
+                name="totalht"
+                required
+                min="0"
+                step="0.01"
+                readonly
+                class="form-input"
+                aria-label="Total net HT"
+              />
+            </div>
+            <div class="form-group">
+              <label for="totalttc">TotalTTC (DT)</label>
+              <input
+                id="totalttc"
+                type="number"
+                [(ngModel)]="currentAbonnement.totalttc"
+                name="totalttc"
+                required
+                min="0"
+                step="0.01"
+                readonly
+                class="form-input"
+                aria-label="Total TTC"
+              />
+            </div>
+            <div class="form-group">
+              <label for="solde">Solde</label>
+              <input
+                id="solde"
+                type="text"
+                value="{{ isSoldeOui(currentAbonnement.restepaye) ? 'Oui' : 'Non' }}"
+                readonly
+                class="form-input"
+                aria-label="Statut du solde"
+              />
+            </div>
+            <div class="form-group">
+              <label for="mtpaye">MTPayee (DT)</label>
+              <input
+                id="mtpaye"
+                type="number"
+                [(ngModel)]="currentAbonnement.mtpaye"
+                name="mtpaye"
+                required
+                min="0"
+                step="0.01"
+                class="form-input"
+                (input)="updateFinancials(currentAbonnement)"
+                aria-label="Montant payé"
+                #mtpaye="ngModel"
+              />
+              <span class="error" *ngIf="mtpaye.invalid && mtpaye.touched">Valeur positive requise</span>
+            </div>
+            <div class="form-group">
+              <label for="restepaye">Restepayee (DT)</label>
+              <input
+                id="restepaye"
+                type="number"
+                [(ngModel)]="currentAbonnement.restepaye"
+                name="restepaye"
+                required
+                min="0"
+                step="0.01"
+                readonly
+                class="form-input"
+                aria-label="Reste à payer"
+              />
+            </div>
           </div>
-          
-          <div class="form-group">
-            <label>DateAbo</label>
-            <input
-              type="date"
-              [(ngModel)]="currentAbonnement.dateabo"
-              name="dateabo"
-              required
-              class="form-input"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>Adhérent</label>
-            <select
-              [(ngModel)]="currentAbonnement.adherent_code"
-              name="adherent_code"
-              required
-              class="form-input"
-            >
-              <option value="">Sélectionner un adhérent</option>
-              <option *ngFor="let adherent of adherents" [value]="adherent.code">
-                {{ adherent.nom }} {{ adherent.prenom }}
-              </option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Type d'Abonnement</label>
-            <select
-              [(ngModel)]="currentAbonnement.type_abonnement_code"
-              name="type_abonnement_code"
-              required
-              class="form-input"
-              (change)="updateDateFin()"
-            >
-              <option value="">Sélectionner un type</option>
-              <option *ngFor="let type of typesAbonnement" [value]="type.code">
-                {{ type.designation }}
-              </option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>DateDeb</label>
-            <input
-              type="date"
-              [(ngModel)]="currentAbonnement.datedeb"
-              name="datedeb"
-              required
-              class="form-input"
-              (change)="updateDateFin()"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>DateFin</label>
-            <input
-              type="date"
-              [(ngModel)]="currentAbonnement.datefin"
-              name="datefin"
-              required
-              readonly
-              class="form-input"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>TotalHTAbo (DT)</label>
-            <input
-              type="number"
-              [(ngModel)]="currentAbonnement.totalhtabo"
-              name="totalhtabo"
-              required
-              min="0"
-              step="0.01"
-              class="form-input"
-              (input)="updateFinancials(currentAbonnement)"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>TotalRemise (DT)</label>
-            <input
-              type="number"
-              [(ngModel)]="currentAbonnement.totalremise"
-              name="totalremise"
-              required
-              min="0"
-              step="0.01"
-              class="form-input"
-              (input)="updateFinancials(currentAbonnement)"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>TotalNHT (DT)</label>
-            <input
-              type="number"
-              [(ngModel)]="currentAbonnement.totalht"
-              name="totalht"
-              required
-              min="0"
-              step="0.01"
-              readonly
-              class="form-input"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>TotalTTC (DT)</label>
-            <input
-              type="number"
-              [(ngModel)]="currentAbonnement.totalttc"
-              name="totalttc"
-              required
-              min="0"
-              step="0.01"
-              readonly
-              class="form-input"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>Solde</label>
-            <input
-              type="text"
-              value="{{ isSoldeOui(currentAbonnement.restepaye) ? 'Oui' : 'Non' }}"
-              readonly
-              class="form-input"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>MTPayee (DT)</label>
-            <input
-              type="number"
-              [(ngModel)]="currentAbonnement.mtpaye"
-              name="mtpaye"
-              required
-              min="0"
-              step="0.01"
-              class="form-input"
-              (input)="updateFinancials(currentAbonnement)"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>Restepayee (DT)</label>
-            <input
-              type="number"
-              [(ngModel)]="currentAbonnement.restepaye"
-              name="restepaye"
-              required
-              min="0"
-              step="0.01"
-              readonly
-              class="form-input"
-            />
-          </div>
-          
           <div class="modal-actions">
-            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
-            <button type="submit" class="save-btn" [disabled]="!abonnementForm.valid">Sauvegarder</button>
+            <button type="button" class="cancel-btn" (click)="closeModal()" aria-label="Annuler">Annuler</button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="!abonnementForm.valid || isSaving"
+              aria-label="Sauvegarder"
+            >
+              {{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}
+            </button>
           </div>
         </form>
       </div>
@@ -191,44 +149,36 @@
         <h2 class="modal-title">Détails de l'abonnement</h2>
         <div class="user-details">
           <p><strong>CodeAbo :</strong> {{ viewedAbonnement?.codeabo }}</p>
-          <p><strong>DateAbo :</strong> {{ viewedAbonnement?.dateabo }}</p>
           <p><strong>Adhérent :</strong> {{ viewedAbonnement?.adherentName }}</p>
+          <p><strong>DateAbo :</strong> {{ viewedAbonnement?.dateabo | date:'dd/MM/yyyy' }}</p>
           <p><strong>Type :</strong> {{ viewedAbonnement?.typeDesignation }}</p>
-          <p><strong>DateDeb :</strong> {{ viewedAbonnement?.datedeb }}</p>
-          <p><strong>DateFin :</strong> {{ viewedAbonnement?.datefin }}</p>
-          <p><strong>TotalHTAbo :</strong> {{ viewedAbonnement?.totalhtabo }} DT</p>
-          <p><strong>TotalRemise :</strong> {{ viewedAbonnement?.totalremise }} DT</p>
-          <p><strong>TotalNHT :</strong> {{ viewedAbonnement?.totalht }} DT</p>
-          <p><strong>TotalTTC :</strong> {{ viewedAbonnement?.totalttc }} DT</p>
+          <p><strong>DateDeb :</strong> {{ viewedAbonnement?.datedeb | date:'dd/MM/yyyy' }}</p>
+          <p><strong>DateFin :</strong> {{ viewedAbonnement?.datefin | date:'dd/MM/yyyy' }}</p>
+          <p><strong>TotalHTAbo :</strong> {{ viewedAbonnement?.totalhtabo | number:'1.2-2' }} DT</p>
+          <p><strong>TotalRemise :</strong> {{ viewedAbonnement?.totalremise | number:'1.0-0' }}%</p>
+          <p><strong>TotalNHT :</strong> {{ viewedAbonnement?.totalht | number:'1.2-2' }} DT</p>
+          <p><strong>TotalTTC :</strong> {{ viewedAbonnement?.totalttc | number:'1.2-2' }} DT</p>
           <p><strong>Solde :</strong> {{ isSoldeOui(viewedAbonnement?.restepaye) ? 'Oui' : 'Non' }}</p>
-          <p><strong>MTPayee :</strong> {{ viewedAbonnement?.mtpaye }} DT</p>
-          <p><strong>Restepayee :</strong> {{ viewedAbonnement?.restepaye }} DT</p>
+          <p><strong>MTPayee :</strong> {{ viewedAbonnement?.mtpaye | number:'1.2-2' }} DT</p>
+          <p><strong>Restepayee :</strong> {{ viewedAbonnement?.restepaye | number:'1.2-2' }} DT</p>
         </div>
         <div class="modal-actions">
-          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
+          <button class="close-btn" (click)="closeViewModal()" aria-label="Fermer">Fermer</button>
         </div>
       </div>
     </div>
 
-    <!-- Modal for Delete Confirmation -->
-    <div class="modal" *ngIf="showDeleteConfirm" @modalAnimation>
-      <div class="modal-content">
-        <h2 class="modal-title">Confirmer la suppression</h2>
-        <p>Êtes-vous sûr de vouloir supprimer l'abonnement {{ abonnementToDelete?.codeabo }} ?</p>
-        <div class="modal-actions">
-          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
-          <button class="delete-btn" (click)="deleteAbonnement()">Supprimer</button>
-        </div>
-      </div>
+    <!-- Toast Notification -->
+    <div class="toast" [ngClass]="toastClass" *ngIf="showToast">
+      {{ toastMessage }}
     </div>
 
     <!-- Header Section -->
     <div class="header">
       <div class="header-title">
-        <h1 class="text-blue-800">Gestion des Abonnements</h1>
-        <p class="text-gray-600">Liste des abonnements enregistrés ({{ filteredAbonnements.length }} abonnements)</p>
+        <h1>Gestion des Abonnements</h1>
+        <p>Liste des abonnements enregistrés ({{ filteredAbonnements.length }} abonnements)</p>
       </div>
-      <!-- Removed: <button class="add-btn" (click)="openAddAbonnementModal()">Ajouter un abonnement</button> -->
     </div>
 
     <!-- Search and Filter Section -->
@@ -240,21 +190,31 @@
           [(ngModel)]="searchQuery"
           (input)="filterAbonnements()"
           class="search-input"
+          aria-label="Rechercher un abonnement"
         />
         <span class="search-icon">🔍</span>
       </div>
       <div class="filter-container">
-        <button class="filter-btn" (click)="toggleFilter()">Filtrer ▼</button>
-        <div class="filter-dropdown" *ngIf="showFilter" [@filterAnimation]>
+        <button class="filter-btn" (click)="toggleFilter()" aria-label="Ouvrir les filtres">Filtrer</button>
+        <div class="filter-dropdown" *ngIf="showFilter" @filterAnimation (clickOutside)="showFilter = false">
           <label class="filter-label">
             Type :
-            <select [(ngModel)]="filterType" (change)="filterAbonnements()" class="filter-select">
+            <select [(ngModel)]="filterType" (change)="filterAbonnements()" class="filter-select" aria-label="Filtrer par type">
               <option value="">Tous</option>
               <option *ngFor="let type of typesAbonnement" [value]="type.designation">
                 {{ type.designation }}
               </option>
             </select>
           </label>
+          <label class="filter-label">
+            Statut :
+            <select [(ngModel)]="filterStatus" (change)="filterAbonnements()" class="filter-select" aria-label="Filtrer par statut">
+              <option value="">Tous</option>
+              <option value="true">Payé</option>
+              <option value="false">Non payé</option>
+            </select>
+          </label>
+          <button class="clear-filter-btn" (click)="clearFilters()" aria-label="Effacer les filtres">Effacer les filtres</button>
         </div>
       </div>
     </div>
@@ -265,6 +225,7 @@
         <thead>
           <tr>
             <th>CodeAbo</th>
+            <th>Adhérent</th>
             <th>DateAbo</th>
             <th>TotalHTAbo</th>
             <th>TotalRemise</th>
@@ -281,20 +242,24 @@
         <tbody>
           <tr *ngFor="let abonnement of filteredAbonnements">
             <td>{{ abonnement.codeabo }}</td>
+            <td>{{ abonnement.adherentName }}</td>
             <td>{{ abonnement.dateabo | date:'dd/MM/yy' }}</td>
             <td>{{ abonnement.totalhtabo | number:'1.2-2' }} DT</td>
-            <td>{{ abonnement.totalremise | number:'1.2-2' }} DT</td>
+            <td>{{ abonnement.totalremise | number:'1.0-0' }}%</td>
             <td>{{ abonnement.totalht | number:'1.2-2' }} DT</td>
             <td>{{ abonnement.totalttc | number:'1.2-2' }} DT</td>
-            <td>{{ isSoldeOui(abonnement.restepaye) ? 'Oui' : 'Non' }}</td>
+            <td>
+              <span class="status" [ngClass]="isSoldeOui(abonnement.restepaye) ? 'status-actif' : 'status-inactif'">
+                {{ isSoldeOui(abonnement.restepaye) ? 'Oui' : 'Non' }}
+              </span>
+            </td>
             <td>{{ abonnement.restepaye | number:'1.2-2' }} DT</td>
             <td>{{ abonnement.mtpaye | number:'1.2-2' }} DT</td>
             <td>{{ abonnement.datedeb | date:'dd/MM/yy' }}</td>
             <td>{{ abonnement.datefin | date:'dd/MM/yy' }}</td>
             <td class="actions">
-              <button class="action-btn view" (click)="viewAbonnement(abonnement)" title="Voir">👁️</button>
-              <button class="action-btn edit" (click)="openEditAbonnementModal(abonnement)" title="Éditer">✏️</button>
-              <button class="action-btn delete" (click)="confirmDeleteAbonnement(abonnement)" title="Supprimer">🗑️</button>
+              <button class="action-btn view" (click)="viewAbonnement(abonnement)" title="Voir" aria-label="Voir les détails">👁️</button>
+              <button class="action-btn edit" (click)="openEditAbonnementModal(abonnement)" title="Modifier" aria-label="Modifier l'abonnement">✏️</button>
             </td>
           </tr>
         </tbody>

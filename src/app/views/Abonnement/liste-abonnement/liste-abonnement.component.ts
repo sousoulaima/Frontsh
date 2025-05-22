@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, HostListener, ChangeDetectorRef, ViewChild, NgZone } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { AbonnementService, Abonnement, Adherent, TypeAbonnement, CategorieAbonnement } from '../../../services/abonnement.service';
+import { AbonnementService, Abonnement, Adherent, TypeAbonnement } from '../../../services/abonnement.service';
 import { forkJoin } from 'rxjs';
 
 interface EnrichedAbonnement extends Abonnement {
   adherentName: string;
   typeDesignation: string;
-  categorieDesignation: string;
 }
 
 @Component({
@@ -20,20 +19,20 @@ interface EnrichedAbonnement extends Abonnement {
   animations: [
     trigger('modalAnimation', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'scale(0.8)' }),
+        style({ opacity: 0, transform: 'scale(0.9)' }),
         animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
       ]),
       transition(':leave', [
-        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.8)' })),
+        animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.9)' })),
       ]),
     ]),
     trigger('filterAnimation', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        style({ opacity: 0, transform: 'translateY(-12px)' }),
         animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
       ]),
       transition(':leave', [
-        animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
+        animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-12px)' })),
       ]),
     ]),
   ],
@@ -43,22 +42,29 @@ export class ListeAbonnementComponent implements OnInit {
   filteredAbonnements: EnrichedAbonnement[] = [];
   adherents: Adherent[] = [];
   typesAbonnement: TypeAbonnement[] = [];
-  categoriesAbonnement: CategorieAbonnement[] = [];
   
   searchQuery = '';
   filterType = '';
-  filterMiPaye = '';
+  filterStatus = '';
   showFilter = false;
   showModal = false;
   showViewModal = false;
-  showDeleteConfirm = false;
-  isEditing = false;
-  
-  currentAbonnement: Partial<Abonnement> = {};
-  viewedAbonnement: EnrichedAbonnement | null = null;
-  abonnementToDelete: EnrichedAbonnement | null = null;
+  showToast = false;
+  toastMessage = '';
+  toastClass = '';
+  isSaving = false;
+  private toastTimeout: any = null;
 
-  constructor(private abonnementService: AbonnementService) {}
+  currentAbonnement: Partial<Abonnement> & { adherentName?: string } = {};
+  viewedAbonnement: EnrichedAbonnement | null = null;
+
+  @ViewChild('abonnementForm') abonnementForm!: NgForm;
+
+  constructor(
+    private abonnementService: AbonnementService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -69,91 +75,104 @@ export class ListeAbonnementComponent implements OnInit {
       abonnements: this.abonnementService.getAllAbonnements(),
       adherents: this.abonnementService.getAllAdherents(),
       types: this.abonnementService.getAllTypesAbonnement(),
-      categories: this.abonnementService.getAllCategories()
     }).subscribe({
       next: (results) => {
         this.adherents = results.adherents;
         this.typesAbonnement = results.types;
-        this.categoriesAbonnement = results.categories;
 
         this.abonnements = results.abonnements.map(abonnement => {
           const adherent = results.adherents.find(a => a.code === abonnement.adherent_code);
           const type = results.types.find(t => t.code === abonnement.type_abonnement_code);
-          const categorie = results.categories.find(c => c.codecateg === abonnement.categorie_abonnement_codecateg);
           
-          // تحويل القيم إلى أرقام مع إزالة النصوص الزايدة
           const updatedAbonnement = {
             ...abonnement,
-            totalhtabo: Number(String(abonnement.totalhtabo).replace(' DT', '')) || 0,
-            totalremise: Number(String(abonnement.totalremise).replace(' DT', '')) || 0,
-            totalht: Number(String(abonnement.totalht).replace(' DT', '')) || 0,
-            totalttc: Number(String(abonnement.totalttc).replace(' DT', '')) || 0,
-            mtpaye: Number(String(abonnement.mtpaye).replace(' DT', '')) || 0,
-            restepaye: Number(String(abonnement.restepaye).replace(' DT', '')) || 0
+            totalhtabo: this.cleanNumber(abonnement.totalhtabo),
+            totalremise: this.cleanNumber(abonnement.totalremise),
+            totalht: this.cleanNumber(abonnement.totalht),
+            totalttc: this.cleanNumber(abonnement.totalttc),
+            mtpaye: this.cleanNumber(abonnement.mtpaye),
+            restepaye: this.cleanNumber(abonnement.restepaye)
           };
 
-          // تحديث القيم المالية
           this.updateFinancials(updatedAbonnement);
 
           return {
             ...updatedAbonnement,
-            solde: this.isSoldeOui(updatedAbonnement.restepaye), // استخدام الدالة isSoldeOui
             adherentName: adherent ? `${adherent.nom} ${adherent.prenom}` : 'Inconnu',
-            typeDesignation: type ? type.designation : 'Inconnu',
-            categorieDesignation: categorie ? categorie.designationcateg : 'Inconnu'
+            typeDesignation: type ? type.designation : 'Inconnu'
           };
         });
 
         this.filteredAbonnements = [...this.abonnements];
-        console.log('Abonnements après chargement:', this.abonnements); // للتحقق
+        this.filterAbonnements();
       },
       error: (err) => {
         console.error('Erreur lors du chargement des données:', err);
+        this.showToastMessage('Erreur lors du chargement des données', 'error');
       }
     });
+  }
+
+  cleanNumber(value: any): number {
+    if (value === null || value === undefined) return 0;
+    const cleanValue = String(value).replace(' DT', '').trim();
+    return Number(parseFloat(cleanValue).toFixed(2)) || 0;
   }
 
   filterAbonnements(): void {
     const query = this.searchQuery.toLowerCase().trim();
     this.filteredAbonnements = this.abonnements.filter((abonnement) => {
+      const dateAboFormatted = abonnement.dateabo ? new Date(abonnement.dateabo).toLocaleDateString('fr-FR') : '';
+      const dateDebFormatted = abonnement.datedeb ? new Date(abonnement.datedeb).toLocaleDateString('fr-FR') : '';
+      const dateFinFormatted = abonnement.datefin ? new Date(abonnement.datefin).toLocaleDateString('fr-FR') : '';
+
       const matchesSearch =
-        abonnement.codeabo?.toString().includes(query) ||
-        abonnement.adherentName.toLowerCase().includes(query) ||
-        abonnement.dateabo?.includes(query) ||
-        abonnement.datedeb?.includes(query) ||
-        abonnement.datefin?.includes(query) ||
-        abonnement.typeDesignation.toLowerCase().includes(query);
-      
+        (abonnement.codeabo?.toString().toLowerCase().includes(query) || false) ||
+        (abonnement.adherentName?.toLowerCase().includes(query) || false) ||
+        (abonnement.typeDesignation?.toLowerCase().includes(query) || false) ||
+        (dateAboFormatted.includes(query) || false) ||
+        (dateDebFormatted.includes(query) || false) ||
+        (dateFinFormatted.includes(query) || false) ||
+        (abonnement.totalhtabo?.toString().includes(query) || false) ||
+        (abonnement.totalttc?.toString().includes(query) || false);
+
       const matchesType = this.filterType ? 
         abonnement.typeDesignation === this.filterType : true;
       
-      return matchesSearch && matchesType;
+      const matchesStatus = this.filterStatus ? 
+        this.isSoldeOui(abonnement.restepaye).toString() === this.filterStatus : true;
+
+      return matchesSearch && matchesType && matchesStatus;
     });
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.filterType = '';
+    this.filterStatus = '';
+    this.showFilter = false;
+    this.filterAbonnements();
   }
 
   toggleFilter(): void {
     this.showFilter = !this.showFilter;
   }
 
-  openEditAbonnementModal(abonnement: EnrichedAbonnement): void {
-    this.isEditing = true;
-    this.currentAbonnement = { ...abonnement };
-    this.updateFinancials(this.currentAbonnement); // تحديث القيم قبل فتح المودال
-    this.showModal = true;
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.filter-container')) {
+      this.showFilter = false;
+    }
   }
 
-  openAddAbonnementModal(): void {
-    this.isEditing = false;
-    this.currentAbonnement = {
-      dateabo: new Date().toISOString().split('T')[0],
-      solde: false,
-      restepaye: 0,
-      mtpaye: 0,
-      totalhtabo: 0,
-      totalremise: 0,
-      totalht: 0,
-      totalttc: 0
+  openEditAbonnementModal(abonnement: EnrichedAbonnement): void {
+    this.currentAbonnement = { 
+      ...abonnement, 
+      totalremise: abonnement.totalremise || 0,
+      adherentName: abonnement.adherentName 
     };
+    this.updateFinancials(this.currentAbonnement);
     this.showModal = true;
   }
 
@@ -162,21 +181,16 @@ export class ListeAbonnementComponent implements OnInit {
     this.currentAbonnement = {};
   }
 
-  updateFinancials(abonnement: Partial<Abonnement>): void {
-    const totalHTAbo = Number(String(abonnement.totalhtabo).replace(' DT', '')) || 0;
-    const totalRemise = Number(String(abonnement.totalremise).replace(' DT', '')) || 0;
-    const taxRate = 0.19; // TVA 19%
-    
-    // حساب TotalHT و TotalTTC
-    abonnement.totalht = totalHTAbo - totalRemise;
-    abonnement.totalttc = Number(((abonnement.totalht || 0) * (1 + taxRate)).toFixed(2)); // تقريب إلى 2 أرقام عشرية
-    
-    // حساب Restepayee بناءً على TotalTTC و MTPaye
-    const mtpaye = Number(String(abonnement.mtpaye).replace(' DT', '')) || 0;
-    abonnement.restepaye = Number((abonnement.totalttc - mtpaye).toFixed(2)); // تقريب إلى 2 أرقام عشرية
-    
-    // تحديث Solde
-    abonnement.solde = this.isSoldeOui(abonnement.restepaye);
+  updateFinancials(abonnement: Partial<Abonnement> = this.currentAbonnement): void {
+    const totalHTAbo = this.cleanNumber(abonnement.totalhtabo);
+    const remisePercentage = this.cleanNumber(abonnement.totalremise);
+    const mtpaye = this.cleanNumber(abonnement.mtpaye);
+    const taxRate = 0.19;
+
+    const remiseAmount = (totalHTAbo * remisePercentage) / 100;
+    abonnement.totalht = Number((totalHTAbo - remiseAmount).toFixed(2));
+    abonnement.totalttc = Number((abonnement.totalht * (1 + taxRate)).toFixed(2));
+    abonnement.restepaye = Number((abonnement.totalttc - mtpaye).toFixed(2));
   }
 
   updateDateFin(): void {
@@ -201,34 +215,114 @@ export class ListeAbonnementComponent implements OnInit {
   }
 
   saveAbonnement(): void {
-    if (!this.currentAbonnement) return;
+    console.log('saveAbonnement appelé, formulaire valide:', this.abonnementForm.valid);
+    if (!this.currentAbonnement || !this.currentAbonnement.codeabo) {
+      console.error('Codeabo manquant:', this.currentAbonnement);
+      this.showToastMessage('Code de l\'abonnement manquant', 'error');
+      return;
+    }
 
-    // تحديث Solde قبل الحفظ
+    if (!this.abonnementForm.valid) {
+      console.error('Formulaire invalide:', this.abonnementForm.controls);
+      this.showToastMessage('Veuillez remplir tous les champs requis', 'error');
+      return;
+    }
+
+    this.isSaving = true;
     this.updateFinancials(this.currentAbonnement);
 
-    if (this.isEditing && this.currentAbonnement.codeabo) {
-      this.abonnementService.update(this.currentAbonnement.codeabo, this.currentAbonnement as Abonnement)
-        .subscribe({
-          next: () => {
-            this.loadData();
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Erreur lors de la mise à jour:', err);
-          }
+    const updatePayload: Abonnement = {
+      codeabo: this.currentAbonnement.codeabo!,
+      adherent_code: this.currentAbonnement.adherent_code!,
+      dateabo: this.currentAbonnement.dateabo!,
+      type_abonnement_code: this.currentAbonnement.type_abonnement_code!,
+      totalhtabo: this.cleanNumber(this.currentAbonnement.totalhtabo),
+      datedeb: this.currentAbonnement.datedeb!,
+      datefin: this.currentAbonnement.datefin!,
+      totalremise: this.cleanNumber(this.currentAbonnement.totalremise),
+      totalht: this.cleanNumber(this.currentAbonnement.totalht),
+      totalttc: this.cleanNumber(this.currentAbonnement.totalttc),
+      mtpaye: this.cleanNumber(this.currentAbonnement.mtpaye),
+      restepaye: this.cleanNumber(this.currentAbonnement.restepaye),
+      solde: this.isSoldeOui(this.currentAbonnement.restepaye),
+      categorie_abonnement_codecateg: this.currentAbonnement.categorie_abonnement_codecateg || '',
+      modalite_reg_id: this.currentAbonnement.modalite_reg_id || ''
+    };
+
+    console.log('Envoi de la requête update avec payload:', updatePayload);
+
+    this.abonnementService.update(Number(updatePayload.codeabo), updatePayload).subscribe({
+      next: (response) => {
+        console.log('Succès: Abonnement modifié, réponse:', response);
+        // Fallback alert to confirm callback
+        window.alert('Abonnement modifié avec succès');
+        this.showToastMessage('Abonnement modifié avec succès', 'success');
+        this.loadData();
+        this.closeModal();
+        this.isSaving = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+      error: (err: unknown) => {
+        console.error('Erreur lors de la modification de l\'abonnement:', err);
+        const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
+        this.showToastMessage('Erreur lors de la modification: ' + errorMessage, 'error');
+        this.isSaving = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        console.log('Requête update terminée');
+      }
+    });
+  }
+
+  showToastMessage(message: string, type: 'success' | 'error'): void {
+    console.log('showToastMessage appelé:', { message, type, showToastBefore: this.showToast });
+    this.ngZone.run(() => {
+      if (this.toastTimeout) {
+        clearTimeout(this.toastTimeout);
+        this.toastTimeout = null;
+      }
+
+      this.toastMessage = message;
+      this.toastClass = type === 'error' ? 'error' : 'success';
+      this.showToast = true;
+      document.body.offsetHeight; // Force reflow
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+
+      console.log('Toast activé:', { showToast: this.showToast, toastMessage: this.toastMessage, toastClass: this.toastClass });
+
+      setTimeout(() => {
+        const toastElement = document.querySelector('.toast');
+        if (toastElement) {
+          const styles = window.getComputedStyle(toastElement);
+          console.log('Toast styles:', {
+            display: styles.display,
+            opacity: styles.opacity,
+            zIndex: styles.zIndex,
+            position: styles.position,
+            top: styles.top,
+            right: styles.right
+          });
+        } else {
+          console.error('Toast element not found in DOM');
+        }
+      }, 100);
+
+      this.toastTimeout = setTimeout(() => {
+        this.ngZone.run(() => {
+          this.showToast = false;
+          this.toastMessage = '';
+          this.toastClass = '';
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+          console.log('Toast désactivé');
+          this.toastTimeout = null;
         });
-    } else {
-      this.abonnementService.createAbonnement(this.currentAbonnement as Abonnement)
-        .subscribe({
-          next: () => {
-            this.loadData();
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Erreur lors de la création:', err);
-          }
-        });
-    }
+      }, 4000);
+    });
   }
 
   viewAbonnement(abonnement: EnrichedAbonnement): void {
@@ -241,55 +335,9 @@ export class ListeAbonnementComponent implements OnInit {
     this.viewedAbonnement = null;
   }
 
-  confirmDeleteAbonnement(abonnement: EnrichedAbonnement): void {
-    this.abonnementToDelete = abonnement;
-    this.showDeleteConfirm = true;
-  }
-
-  cancelDelete(): void {
-    this.showDeleteConfirm = false;
-    this.abonnementToDelete = null;
-  }
-
-  deleteAbonnement(): void {
-    if (!this.abonnementToDelete?.codeabo) return;
-
-    this.abonnementService.delete(this.abonnementToDelete.codeabo)
-      .subscribe({
-        next: () => {
-          this.loadData();
-          this.cancelDelete();
-        },
-        error: (err) => {
-          console.error('Erreur lors de la suppression:', err);
-        }
-      });
-  }
-
-  getMiPayeClass(mtpaye: any): string {
-    if (!mtpaye) return '';
-
-    const mode = typeof mtpaye === 'string' ? mtpaye.toLowerCase() : String(mtpaye).toLowerCase();
-    
-    switch (mode) {
-      case 'espèces':
-      case 'especes':
-        return 'miPaye-especes';
-      case 'carte':
-        return 'miPaye-carte';
-      case 'chèque':
-      case 'cheque':
-        return 'miPaye-cheque';
-      default:
-        return '';
-    }
-  }
-
-  // floating point
   isSoldeOui(restepaye: number | string | undefined): boolean {
-    if (restepaye === undefined) return false;
-    const cleanValue = String(restepaye).replace(' DT', '').trim();
-    const roundedValue = Number(Number(cleanValue).toFixed(2)); // تقريب إلى 2 أرقام عشرية
-    return roundedValue === 0;
+    if (restepaye === undefined || restepaye === null) return false;
+    const cleanValue = this.cleanNumber(restepaye);
+    return cleanValue <= 0;
   }
 }

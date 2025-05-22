@@ -40,6 +40,15 @@ interface CategorieDisplay {
         animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.8)' })),
       ]),
     ]),
+    trigger('successAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' })),
+      ]),
+    ]),
   ],
 })
 export class TypesAbonnementComponent implements OnInit {
@@ -58,6 +67,7 @@ export class TypesAbonnementComponent implements OnInit {
   subscriptionToDelete: TypeAbonnementDisplay | null = null;
   isLoading = false;
   errorMessage = '';
+  successMessage: string | null = null;
 
   constructor(
     private typeAbonnementService: TypeAbonnementService,
@@ -106,7 +116,6 @@ export class TypesAbonnementComponent implements OnInit {
     this.isLoading = true;
     this.typeAbonnementService.getAll().subscribe({
       next: (data: any) => {
-        
         this.subscriptions = data.map((item: any) => ({
           code: item.code.toString(),
           designation: item.designation || '',
@@ -120,7 +129,6 @@ export class TypesAbonnementComponent implements OnInit {
         }));
         this.filteredSubscriptions = [...this.subscriptions];
         this.isLoading = false;
-        
       },
       error: (err) => {
         console.error('Erreur lors du chargement:', err);
@@ -131,13 +139,11 @@ export class TypesAbonnementComponent implements OnInit {
   }
 
   getCategorieName(idCategorie: string): string {
-    
     console.log(typeof idCategorie); // should be 'string'
-    console.log(typeof this.categories[0].codecateg); // should also be 'string'
+    console.log(typeof this.categories[0]?.codecateg); // should also be 'string'
     let designation = 'N/A';
     for (let i = 0; i < this.categories.length; i++) {
-      
-      if (this.categories[i].codecateg.toString()  === idCategorie.toString() ) {
+      if (this.categories[i].codecateg.toString() === idCategorie.toString()) {
         designation = this.categories[i].designationcateg;
       }
     }
@@ -223,7 +229,6 @@ export class TypesAbonnementComponent implements OnInit {
   }
 
   saveSubscription(): void {
-    
     if (!this.validateForm()) {
       return;
     }
@@ -246,6 +251,7 @@ export class TypesAbonnementComponent implements OnInit {
           this.loadSubscriptions();
           this.closeModal();
           this.isLoading = false;
+          this.showSuccessMessage('Types d\'Abonnement modifié avec succès');
         },
         error: (err) => {
           console.error('Erreur lors de la mise à jour:', err);
@@ -259,6 +265,7 @@ export class TypesAbonnementComponent implements OnInit {
           this.loadSubscriptions();
           this.closeModal();
           this.isLoading = false;
+          this.showSuccessMessage('Types d\'Abonnement ajouté avec succès');
         },
         error: (err) => {
           console.error('Erreur lors de la création:', err);
@@ -297,6 +304,7 @@ export class TypesAbonnementComponent implements OnInit {
           this.loadSubscriptions();
           this.cancelDelete();
           this.isLoading = false;
+          this.showSuccessMessage('Types d\'Abonnement supprimé avec succès');
         },
         error: (err) => {
           console.error('Erreur lors de la suppression:', err);
@@ -305,5 +313,12 @@ export class TypesAbonnementComponent implements OnInit {
         },
       });
     }
+  }
+
+  showSuccessMessage(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 3000);
   }
 }

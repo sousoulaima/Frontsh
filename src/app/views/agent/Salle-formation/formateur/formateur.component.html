@@ -1,14 +1,25 @@
 <div class="gestion-formateurs-container">
   <div class="gestion-formateurs">
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="showSuccess" @fadeAnimation>
+      {{ successMessage }}
+    </div>
+
     <!-- Modal for Adding/Editing a Formateur -->
     <div class="modal" *ngIf="showModal" @modalAnimation>
       <div class="modal-content">
         <h2 class="modal-title">{{ isEditing ? 'Éditer le formateur' : 'Ajouter un formateur' }}</h2>
+        <div *ngIf="formErrors.length > 0" class="error-messages">
+          <p *ngFor="let error of formErrors" class="error">{{ error }}</p>
+        </div>
+        <div *ngIf="backendErrors.length > 0" class="error-messages">
+          <p *ngFor="let error of backendErrors" class="error">{{ error }}</p>
+        </div>
         <form (ngSubmit)="saveFormateur()" #formateurForm="ngForm">
           <!-- Section: Informations personnelles -->
           <div class="form-section">
             <h3>Informations personnelles</h3>
-            <div class="form-grid">
+            <div class="form-row">
               <div class="form-group">
                 <label>Code <span class="required">*</span></label>
                 <input
@@ -19,6 +30,7 @@
                   required
                   readonly
                   class="form-input"
+                  aria-label="Code"
                   [ngClass]="{'invalid': codefor.invalid && (codefor.dirty || codefor.touched)}"
                 />
                 <span class="error" *ngIf="codefor.invalid && (codefor.dirty || codefor.touched)">Le code est requis.</span>
@@ -33,6 +45,7 @@
                   required
                   pattern="[A-Za-zÀ-ÿ\s-]+"
                   class="form-input"
+                  aria-label="Nom"
                   [ngClass]="{'invalid': nomfor.invalid && (nomfor.dirty || nomfor.touched)}"
                 />
                 <span class="error" *ngIf="nomfor.invalid && (nomfor.dirty || nomfor.touched)">
@@ -49,6 +62,7 @@
                   required
                   pattern="[A-Za-zÀ-ÿ\s-]+"
                   class="form-input"
+                  aria-label="Prénom"
                   [ngClass]="{'invalid': prenomfor.invalid && (prenomfor.dirty || prenomfor.touched)}"
                 />
                 <span class="error" *ngIf="prenomfor.invalid && (prenomfor.dirty || prenomfor.touched)">
@@ -61,7 +75,7 @@
           <!-- Section: Informations de contact -->
           <div class="form-section">
             <h3>Informations de contact</h3>
-            <div class="form-grid">
+            <div class="form-row">
               <div class="form-group">
                 <label>Email <span class="required">*</span></label>
                 <input
@@ -72,6 +86,7 @@
                   required
                   email
                   class="form-input"
+                  aria-label="Email"
                   [ngClass]="{'invalid': emailfor.invalid && (emailfor.dirty || emailfor.touched)}"
                 />
                 <span class="error" *ngIf="emailfor.invalid && (emailfor.dirty || emailfor.touched)">Email invalide.</span>
@@ -86,6 +101,7 @@
                   required
                   pattern="[0-9]{8}"
                   class="form-input"
+                  aria-label="Téléphone"
                   [ngClass]="{'invalid': telfor.invalid && (telfor.dirty || telfor.touched)}"
                 />
                 <span class="error" *ngIf="telfor.invalid && (telfor.dirty || telfor.touched)">
@@ -101,6 +117,7 @@
                   #adrfor="ngModel"
                   required
                   class="form-input"
+                  aria-label="Adresse"
                   [ngClass]="{'invalid': adrfor.invalid && (adrfor.dirty || adrfor.touched)}"
                 />
                 <span class="error" *ngIf="adrfor.invalid && (adrfor.dirty || adrfor.touched)">L'adresse est requise.</span>
@@ -109,8 +126,15 @@
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="cancel-btn" (click)="closeModal()">Annuler</button>
-            <button type="submit" class="save-btn" [disabled]="!formateurForm.valid">Sauvegarder</button>
+            <button type="button" class="cancel-btn" (click)="closeModal()" aria-label="Annuler">Annuler</button>
+            <button
+              type="submit"
+              class="save-btn"
+              [disabled]="!formateurForm.valid || isSaving"
+              aria-label="Sauvegarder"
+            >
+              {{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}
+            </button>
           </div>
         </form>
       </div>
@@ -121,15 +145,15 @@
       <div class="modal-content">
         <h2 class="modal-title">Détails du formateur</h2>
         <div class="user-details">
-          <p><strong>Code :</strong> {{ viewedFormateur?.codefor }}</p>
-          <p><strong>Nom :</strong> {{ viewedFormateur?.nomfor }}</p>
-          <p><strong>Prénom :</strong> {{ viewedFormateur?.prenomfor }}</p>
-          <p><strong>Email :</strong> {{ viewedFormateur?.emailfor }}</p>
-          <p><strong>Téléphone :</strong> {{ viewedFormateur?.telfor }}</p>
-          <p><strong>Adresse :</strong> {{ viewedFormateur?.adrfor }}</p>
+          <p><strong>Code :</strong> {{ viewedFormateur?.codefor || 'N/A' }}</p>
+          <p><strong>Nom :</strong> {{ viewedFormateur?.nomfor || 'N/A' }}</p>
+          <p><strong>Prénom :</strong> {{ viewedFormateur?.prenomfor || 'N/A' }}</p>
+          <p><strong>Email :</strong> {{ viewedFormateur?.emailfor || 'N/A' }}</p>
+          <p><strong>Téléphone :</strong> {{ viewedFormateur?.telfor || 'N/A' }}</p>
+          <p><strong>Adresse :</strong> {{ viewedFormateur?.adrfor || 'N/A' }}</p>
         </div>
         <div class="modal-actions">
-          <button class="close-btn" (click)="closeViewModal()">Fermer</button>
+          <button class="close-btn" (click)="closeViewModal()" aria-label="Fermer">Fermer</button>
         </div>
       </div>
     </div>
@@ -140,8 +164,8 @@
         <h2 class="modal-title">Confirmer la suppression</h2>
         <p class="modal-text">Êtes-vous sûr de vouloir supprimer le formateur {{ formateurToDelete?.codefor }} ?</p>
         <div class="modal-actions">
-          <button class="cancel-btn" (click)="cancelDelete()">Annuler</button>
-          <button class="delete-btn" (click)="deleteFormateur()">Supprimer</button>
+          <button class="cancel-btn" (click)="cancelDelete()" aria-label="Annuler">Annuler</button>
+          <button class="delete-btn" (click)="deleteFormateur()" aria-label="Supprimer">Supprimer</button>
         </div>
       </div>
     </div>
@@ -149,11 +173,11 @@
     <!-- Header Section -->
     <div class="header">
       <div class="header-title">
-        <h1 class="text-blue-800 animate-fade-in">Gestion des Formateurs</h1>
-        <p class="text-gray-600 animate-fade-in">Liste des formateurs enregistrés ({{ filteredFormateurs.length }} formateurs)</p>
+        <h1>Gestion des Formateurs</h1>
+        <p>Liste des formateurs enregistrés ({{ filteredFormateurs.length }} formateurs)</p>
       </div>
       <div class="actions">
-        <button class="add-btn" (click)="openAddFormateurModal()">+ Ajouter un formateur</button>
+        <button class="add-btn" (click)="openAddFormateurModal()" aria-label="Ajouter un formateur">+ Ajouter un formateur</button>
       </div>
     </div>
 
@@ -166,8 +190,25 @@
           [(ngModel)]="searchQuery"
           (input)="filterFormateurs()"
           class="search-input"
+          aria-label="Rechercher un formateur"
         />
         <span class="search-icon">🔍</span>
+      </div>
+      <div class="filter-container">
+        <button class="filter-btn" (click)="toggleFilter()" aria-label="Ouvrir les filtres">Filtrer</button>
+        <div class="filter-dropdown" *ngIf="showFilter" @filterAnimation>
+          <label class="filter-label">
+            Nom :
+            <input
+              type="text"
+              [(ngModel)]="filterNom"
+              (input)="filterFormateurs()"
+              class="filter-input"
+              placeholder="Filtrer par nom"
+              aria-label="Filtrer par nom"
+            />
+          </label>
+        </div>
       </div>
     </div>
 
@@ -186,21 +227,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let formateur of filteredFormateurs; let i = index"
-            class="animate-slide-in-right"
-            [ngClass]="'animation-delay-' + (i * 100)"
-          >
-            <td>{{ formateur.codefor }}</td>
-            <td>{{ formateur.nomfor }}</td>
-            <td>{{ formateur.prenomfor }}</td>
-            <td>{{ formateur.emailfor }}</td>
-            <td>{{ formateur.telfor }}</td>
-            <td>{{ formateur.adrfor }}</td>
+          <tr *ngFor="let formateur of filteredFormateurs">
+            <td>{{ formateur.codefor || 'N/A' }}</td>
+            <td>{{ formateur.nomfor || 'N/A' }}</td>
+            <td>{{ formateur.prenomfor || 'N/A' }}</td>
+            <td>{{ formateur.emailfor || 'N/A' }}</td>
+            <td>{{ formateur.telfor || 'N/A' }}</td>
+            <td>{{ formateur.adrfor || 'N/A' }}</td>
             <td class="actions">
-              <button class="action-btn view" (click)="viewFormateur(formateur)" title="Voir">👁️</button>
-              <button class="action-btn edit" (click)="openEditFormateurModal(formateur)" title="Éditer">✏️</button>
-              <button class="action-btn delete" (click)="confirmDeleteFormateur(formateur)" title="Supprimer">🗑️</button>
+              <button class="action-btn view" (click)="viewFormateur(formateur)" title="Voir" aria-label="Voir les détails">👁️</button>
+              <button class="action-btn edit" (click)="openEditFormateurModal(formateur)" title="Éditer" aria-label="Éditer le formateur">✏️</button>
+              <button class="action-btn delete" (click)="confirmDeleteFormateur(formateur)" title="Supprimer" aria-label="Supprimer le formateur">🗑️</button>
             </td>
           </tr>
         </tbody>

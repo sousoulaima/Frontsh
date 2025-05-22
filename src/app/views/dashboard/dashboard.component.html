@@ -1,136 +1,72 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-100">
   <!-- Header -->
   <header class="bg-white shadow-sm">
     <div class="max-w-7xl mx-auto py-4 px-6 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <!-- Placeholder pour le logo -->
-       
-        <h1 class="text-2xl font-bold text-blue-700">S.H Coworking Tableau de bord</h1>
-      </div>
-      <div class="flex space-x-4">
-        <!-- Bouton ou autre élément si nécessaire -->
-      </div>
+      <h1 class="text-2xl font-bold text-gray-700">S.H Coworking Tableau de bord</h1>
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto py-8 px-6">
     <!-- Statistic Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-      <div class="bg-blue-100 p-6 rounded-xl border border-gray-200 flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300">
-        <span class="text-3xl">📝</span>
-        <div>
-          <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Abonnements</p>
-          <span class="text-2xl font-bold text-gray-900">{{ totalStats.abonnements || 0 }}</span>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-5 gap-6 mb-6">
+      <div class="stat-card">
+        <span class="text-3xl mb-2 text-blue-300">📝</span>
+        <p class="text-lg font-semibold text-gray-600">{{ totalStats.abonnements || 0 }}</p>
+        <p class="text-sm text-blue-400">Abonnements</p>
       </div>
-      <div class="bg-blue-200 p-6 rounded-xl border border-gray-200 flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300">
-        <span class="text-3xl">👥</span>
-        <div>
-          <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Adhérents</p>
-          <span class="text-2xl font-bold text-gray-900">{{ totalStats.adherents || 0 }}</span>
-        </div>
+      <div class="stat-card">
+        <span class="text-3xl mb-2 text-blue-300">👥</span>
+        <p class="text-lg font-semibold text-gray-600">{{ totalStats.adherents || 0 }}</p>
+        <p class="text-sm text-blue-400">Adhérents</p>
       </div>
-      <div class="bg-blue-300 p-6 rounded-xl border border-gray-200 flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300">
-        <span class="text-3xl">🏢</span>
-        <div>
-          <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Salles</p>
-          <span class="text-2xl font-bold text-gray-900">{{ totalStats.salles || 0 }}</span>
-        </div>
+      <div class="stat-card">
+        <span class="text-3xl mb-2 text-blue-300">🏢</span>
+        <p class="text-lg font-semibold text-gray-600">{{ totalStats.salles || 0 }}</p>
+        <p class="text-sm text-blue-400">Salles</p>
       </div>
-      <div class="bg-blue-400 p-6 rounded-xl border border-gray-200 flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300">
-        <span class="text-3xl">📅</span>
-        <div>
-          <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Réservations</p>
-          <span class="text-2xl font-bold text-gray-900">{{ totalStats.reservations || 0 }}</span>
-        </div>
+      <div class="stat-card">
+        <span class="text-3xl mb-2 text-blue-300">📅</span>
+        <p class="text-lg font-semibold text-gray-600">{{ totalStats.reservations || 0 }}</p>
+        <p class="text-sm text-blue-400">Réservations</p>
+      </div>
+      <div class="stat-card">
+        <span class="text-3xl mb-2 text-blue-300">💰</span>
+        <p class="text-lg font-semibold text-gray-600">{{ totalRevenue.toFixed(2) }} DT</p>
+        <p class="text-sm text-blue-400">Revenu Total</p>
       </div>
     </div>
 
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Abonnements Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Abonnements</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleAbonnementsChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleAbonnementsChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #abonnementsChart class="w-full h-64"></canvas>
+      <div class="chart-card">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Abonnements <span class="text-2xl text-blue-300">📝</span></h3>
+        <canvas #abonnementsChart class="w-full h-48"></canvas>
       </div>
 
-      <!-- Top Réservations Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Top Réservations</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleReservationsChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleReservationsChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #reservationsChart class="w-full h-64"></canvas>
+      <!-- Adherents Profession Chart -->
+      <div class="chart-card">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Professions <span class="text-2xl text-blue-300">👥</span></h3>
+        <canvas #adherentsProfessionChart class="w-full h-48"></canvas>
       </div>
 
-      <!-- Répartition Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Répartition par Profession</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleAdherentsProfessionChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleAdherentsProfessionChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #adherentsProfessionChart class="w-full h-64"></canvas>
-      </div>
-
-      <!-- Revenus par Mois Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Revenus par Mois</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleAbonnementsTtcChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleAbonnementsTtcChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #abonnementsTtcChart class="w-full h-64"></canvas>
-      </div>
-
-      <!-- Réservations par Salle Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Réservations par Salle</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleReservationsPerSalleChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleReservationsPerSalleChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #reservationsPerSalleChart class="w-full h-64"></canvas>
-      </div>
-
-      <!-- Formateurs Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Formateurs</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleFormateursCreationChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleFormateursCreationChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #formateursCreationChart class="w-full h-64"></canvas>
+      <!-- Reservation Status Chart -->
+      <div class="chart-card">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Statut Réservations <span class="text-2xl text-blue-300">📅</span></h3>
+        <canvas #reservationStatusChart class="w-full h-48"></canvas>
       </div>
 
       <!-- Revenue Trends Chart -->
-      <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 col-span-1 lg:col-span-3">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800">Tendances des Revenus</h3>
-          <div class="flex space-x-2">
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleRevenueTrendsChart('online')">Online</button>
-            <button class="px-3 py-1 text-sm text-gray-600 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200" (click)="toggleRevenueTrendsChart('offline')">Offline</button>
-          </div>
-        </div>
-        <canvas #revenueTrendsChart class="w-full h-64"></canvas>
+      <div class="chart-card lg:col-span-2">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Tendances des Revenus <span class="text-2xl text-blue-300">💰</span></h3>
+        <canvas #revenueTrendsChart class="w-full h-48"></canvas>
+      </div>
+
+      <!-- Formateurs Creation Chart -->
+      <div class="chart-card lg:col-span-1">
+        <h3 class="text-lg font-semibold text-gray-600 mb-4">Formateurs Créés <span class="text-2xl text-blue-300">👨‍🏫</span></h3>
+        <canvas #formateursCreationChart class="w-full h-48"></canvas>
       </div>
     </div>
   </main>
