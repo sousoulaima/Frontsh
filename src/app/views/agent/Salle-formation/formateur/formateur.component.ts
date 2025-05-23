@@ -3,13 +3,30 @@ import { Formateur, FormateurService } from '../../../../services/formateur.serv
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
+
+@Directive({
+  selector: '[clickOutside]',
+  standalone: true
+})
+export class ClickOutsideDirective {
+  @Output() clickOutside = new EventEmitter<void>();
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.filter-container')) {
+      this.clickOutside.emit();
+    }
+  }
+}
 
 @Component({
   selector: 'app-formateur',
   standalone: true,
   templateUrl: './formateur.component.html',
   styleUrls: ['./formateur.component.scss'],
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ClickOutsideDirective],
   animations: [
     trigger('modalAnimation', [
       transition(':enter', [
@@ -73,15 +90,17 @@ export class FormateurComponent implements OnInit {
   }
 
   private displaySuccessMessage(message: string): void {
-    this.successMessage = message;
-    this.showSuccess = true;
-    this.cdr.detectChanges();
-
-    setTimeout(() => {
-      this.showSuccess = false;
-      this.successMessage = null;
+    this.ngZone.run(() => {
+      this.successMessage = message;
+      this.showSuccess = true;
       this.cdr.detectChanges();
-    }, 3000);
+
+      setTimeout(() => {
+        this.showSuccess = false;
+        this.successMessage = null;
+        this.cdr.detectChanges();
+      }, 3000);
+    });
   }
 
   resetFormateur(): Partial<Formateur> {
@@ -103,6 +122,7 @@ export class FormateurComponent implements OnInit {
           codefor: String(f.codefor || '')
         }));
         this.filteredFormateurs = [...this.formateurs];
+        this.filterFormateurs();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -136,6 +156,11 @@ export class FormateurComponent implements OnInit {
 
   toggleFilter(): void {
     this.showFilter = !this.showFilter;
+    this.cdr.detectChanges();
+  }
+
+  closeFilter(): void {
+    this.showFilter = false;
     this.cdr.detectChanges();
   }
 

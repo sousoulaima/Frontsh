@@ -196,7 +196,7 @@
       </div>
       <div class="filter-container">
         <button class="filter-btn" (click)="toggleFilter()" aria-label="Ouvrir les filtres">Filtrer</button>
-        <div class="filter-dropdown" *ngIf="showFilter" @filterAnimation>
+        <div class="filter-dropdown" *ngIf="showFilter" @filterAnimation clickOutside (clickOutside)="closeFilter()">
           <label class="filter-label">
             Nom :
             <input

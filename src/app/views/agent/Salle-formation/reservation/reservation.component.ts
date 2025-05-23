@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit, Directive, EventEmitter, HostListener, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -7,10 +7,26 @@ import { ReservationSalle, ReservationSalleService } from '../../../../services/
 import { SalleFormation, SalleFormationService } from '../../../../services/salle-formation.service';
 import { Formateur, FormateurService } from '../../../../services/formateur.service';
 
+@Directive({
+  selector: '[clickOutside]',
+  standalone: true
+})
+export class ClickOutsideDirective {
+  @Output() clickOutside = new EventEmitter<void>();
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.filter-container')) {
+      this.clickOutside.emit();
+    }
+  }
+}
+
 @Component({
   selector: 'app-reservation',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ClickOutsideDirective],
   templateUrl: './reservation.component.html',
   styleUrls: ['./reservation.component.scss'],
   animations: [
@@ -93,6 +109,7 @@ export class ReservationComponent implements OnInit {
       next: (reservations) => {
         this.reservations = reservations;
         this.filteredReservations = [...reservations];
+        this.filterReservations();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading reservations:', err)
@@ -135,9 +152,9 @@ export class ReservationComponent implements OnInit {
       const matchesSearch =
         (reservation.id?.toString() || '').toLowerCase().includes(query) ||
         (reservation.datereservation || '').toLowerCase().includes(query) ||
-        (reservation.salle_formation?.designationsalle || '').toLowerCase().includes(query) ||
-        `${reservation.formateur?.nomfor || ''} ${reservation.formateur?.prenomfor || ''}`.toLowerCase().includes(query) ||
-        (reservation.montantreservation || '').toLowerCase().includes(query);
+        (this.getSalleDesignation(reservation.salle_formation_codesalle) || '').toLowerCase().includes(query) ||
+        (this.getFormateurName(reservation.formateur_codefor) || '').toLowerCase().includes(query) ||
+        (reservation.montantreservation?.toString() || '').toLowerCase().includes(query);
       const matchesSalle = this.filterSalleCode ?
         reservation.salle_formation_codesalle?.toString() === this.filterSalleCode : true;
       return matchesSearch && matchesSalle;
@@ -147,6 +164,11 @@ export class ReservationComponent implements OnInit {
 
   toggleFilter(): void {
     this.showFilter = !this.showFilter;
+    this.cdr.detectChanges();
+  }
+
+  closeFilter(): void {
+    this.showFilter = false;
     this.cdr.detectChanges();
   }
 

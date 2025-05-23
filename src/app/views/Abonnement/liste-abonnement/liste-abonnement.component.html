@@ -14,8 +14,8 @@
                 [(ngModel)]="currentAbonnement.datedeb"
                 name="datedeb"
                 required
+                readonly
                 class="form-input"
-                (change)="updateDateFin()"
                 aria-label="Date de début"
                 #datedeb="ngModel"
               />
@@ -41,8 +41,8 @@
                 [(ngModel)]="currentAbonnement.totalremise"
                 name="totalremise"
                 required
+                disabled
                 class="form-input"
-                (change)="updateFinancials(currentAbonnement)"
                 aria-label="Sélectionner une remise en pourcentage"
                 #totalremise="ngModel"
               >

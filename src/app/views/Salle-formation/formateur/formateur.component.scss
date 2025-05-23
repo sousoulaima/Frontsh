@@ -134,9 +134,16 @@
         font-size: 14px;
         font-weight: 500;
         transition: all 0.3s ease;
+        cursor: pointer;
 
         &:hover {
           background: #f9fafb;
+        }
+
+        &::after {
+          content: '▼';
+          font-size: 10px;
+          margin-left: 8px;
         }
       }
 
@@ -149,19 +156,21 @@
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         padding: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 200px;
 
         .filter-label {
           display: block;
           font-size: 13px;
           color: #1f2a44;
           margin-bottom: 8px;
+          font-weight: 500;
 
           .filter-input {
             width: 100%;
             padding: 9px;
-            border: 2px solid #e5e7eb;
+            border: 1px solid #e5e7eb;
             border-radius: 6px;
             margin-top: 4px;
             font-size: 13px;

@@ -314,7 +314,7 @@
             outline: none;
           }
 
-          &[readonly] {
+          &[readonly], &[disabled] {
             background: #e5e7eb;
             cursor: not-allowed;
           }

@@ -193,27 +193,6 @@ export class ListeAbonnementComponent implements OnInit {
     abonnement.restepaye = Number((abonnement.totalttc - mtpaye).toFixed(2));
   }
 
-  updateDateFin(): void {
-    if (!this.currentAbonnement.datedeb || !this.currentAbonnement.type_abonnement_code) {
-      this.currentAbonnement.datefin = undefined;
-      return;
-    }
-    
-    const type = this.typesAbonnement.find(t => t.code === this.currentAbonnement.type_abonnement_code);
-    if (!type) return;
-    
-    const startDate = new Date(this.currentAbonnement.datedeb);
-    const endDate = new Date(startDate);
-    
-    if (type.nbmois) {
-      endDate.setMonth(startDate.getMonth() + type.nbmois);
-    } else if (type.nbjours) {
-      endDate.setDate(startDate.getDate() + type.nbjours);
-    }
-    
-    this.currentAbonnement.datefin = endDate.toISOString().split('T')[0];
-  }
-
   saveAbonnement(): void {
     console.log('saveAbonnement appelé, formulaire valide:', this.abonnementForm.valid);
     if (!this.currentAbonnement || !this.currentAbonnement.codeabo) {
@@ -254,7 +233,6 @@ export class ListeAbonnementComponent implements OnInit {
     this.abonnementService.update(Number(updatePayload.codeabo), updatePayload).subscribe({
       next: (response) => {
         console.log('Succès: Abonnement modifié, réponse:', response);
-        // Fallback alert to confirm callback
         window.alert('Abonnement modifié avec succès');
         this.showToastMessage('Abonnement modifié avec succès', 'success');
         this.loadData();
@@ -288,7 +266,7 @@ export class ListeAbonnementComponent implements OnInit {
       this.toastMessage = message;
       this.toastClass = type === 'error' ? 'error' : 'success';
       this.showToast = true;
-      document.body.offsetHeight; // Force reflow
+      document.body.offsetHeight;
       this.cdr.markForCheck();
       this.cdr.detectChanges();
 
